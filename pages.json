@@ -1,0 +1,42 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "土木工程计算工具箱",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/calculator/bearing",
+			"style": {
+				"navigationBarTitleText": "正截面承载力计算",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/calculator/section-design",
+			"style": {
+				"navigationBarTitleText": "截面设计",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/calculator/rebar",
+			"style": {
+				"navigationBarTitleText": "配筋计算",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "土木工程计算工具箱",
+		"navigationBarBackgroundColor": "#2C6FCE",
+		"backgroundColor": "#F5F6FA"
+	}
+}

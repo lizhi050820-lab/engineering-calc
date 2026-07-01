@@ -1,0 +1,29 @@
+# HBuilderX / uni-app 编译产物
+unpackage/
+frontend/
+.hbuilderx/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# 依赖
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 临时文件
+SESSION_CONTEXT.md
+*.log

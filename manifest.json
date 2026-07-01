@@ -1,0 +1,41 @@
+{
+    "name": "土木工程计算工具箱",
+    "appid": "wx1371fdaae8c8e216",
+    "description": "正截面承载力、配筋计算等土木工程专业计算工具",
+    "versionName": "1.0.0",
+    "versionCode": "100",
+    "transformPx": false,
+    "app-plus": {
+        "usingComponents": true,
+        "nvueStyleCompiler": "uni-app",
+        "compilerVersion": 3,
+        "splashscreen": {
+            "alwaysShowBeforeRender": true,
+            "waiting": true,
+            "autoclose": true,
+            "delay": 0
+        },
+        "modules": {},
+        "distribute": {
+            "android": {
+                "permissions": []
+            },
+            "ios": {},
+            "sdkConfigs": {}
+        }
+    },
+    "mp-weixin": {
+        "appid": "wx1371fdaae8c8e216",
+        "setting": {
+            "urlCheck": false,
+            "es6": true,
+            "postcss": true,
+            "minified": true
+        },
+        "usingComponents": true
+    },
+    "uniStatistics": {
+        "enable": false
+    },
+    "vueVersion": "3"
+}
