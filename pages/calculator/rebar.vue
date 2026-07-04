@@ -81,84 +81,98 @@
 
     <!-- 计算结果 -->
     <view class="card" v-if="result">
-      <!-- 主要结果 -->
-      <view class="result-card">
-        <view class="result-label">所需钢筋面积</view>
-        <view class="result-value">
-          {{ result.data.as_req }}
-          <text class="result-unit">mm²</text>
-        </view>
-
-        <!-- 判定 -->
-        <view style="text-align:center;">
-          <text class="status-tag" :class="statusClass">{{ result.message }}</text>
-        </view>
+      <!-- 核心结果 -->
+      <view class="calc-hero">
+        <text class="calc-hero-label">所需钢筋面积</text>
+        <text class="calc-hero-value">{{ result.data.as_req }}<text class="calc-hero-unit"> mm²</text></text>
+        <text class="status-tag" :class="statusClass">{{ result.message }}</text>
       </view>
 
-      <!-- 关键参数 -->
-      <view class="params-grid">
-        <view class="param-item">
-          <text class="param-label">相对受压区高度 ξ</text>
-          <text class="param-value">{{ result.data.xi }}</text>
+      <!-- 计算过程 -->
+      <view class="calc-process">
+        <view class="calc-row">
+          <text class="calc-key">材料参数</text>
+          <text class="calc-val">fc = {{ result.data.fc }} MPa, fy = {{ result.data.fy }} MPa</text>
         </view>
-        <view class="param-item">
-          <text class="param-label">截面抵抗矩系数 αs</text>
-          <text class="param-value">{{ result.data.alpha_s }}</text>
-        </view>
-        <view class="param-item">
-          <text class="param-label">内力臂系数 γs</text>
-          <text class="param-value">{{ result.data.gamma_s }}</text>
-        </view>
-        <view class="param-item">
-          <text class="param-label">是否需双筋</text>
-          <text class="param-value" :class="{ 'text-warn': result.data.need_double }">
-            {{ result.data.need_double ? '是' : '否' }}
-          </text>
-        </view>
-        <view class="param-item">
-          <text class="param-label">最小配筋面积</text>
-          <text class="param-value">{{ result.data.as_min }} mm²</text>
-        </view>
-        <view class="param-item">
-          <text class="param-label">单筋最大配筋面积</text>
-          <text class="param-value">{{ result.data.as_max }} mm²</text>
-        </view>
-      </view>
+        <view class="calc-hr"></view>
 
-      <!-- 双筋附加信息 -->
-      <view class="double-info" v-if="result.data.need_double">
-        <text class="double-label">⚠ 需配置受压钢筋</text>
-        <text class="double-value">As' = {{ result.data.as_prime_req }} mm²</text>
+        <view class="calc-row">
+          <text class="calc-key">有效高度</text>
+          <text class="calc-val">h₀ = h − a_s = {{ form.h }} − {{ form.a_s }} = {{ result.data.h0 }} mm</text>
+        </view>
+        <view class="calc-hr"></view>
+
+        <view class="calc-row">
+          <text class="calc-key">界限 ξb</text>
+          <text class="calc-val">{{ result.data.xi_b }}</text>
+        </view>
+        <view class="calc-hr"></view>
+
+        <view class="calc-row">
+          <text class="calc-key">抵抗矩系数</text>
+          <text class="calc-val">αs = M / (α₁·fc·b·h₀²) = {{ result.data.alpha_s }}</text>
+        </view>
+        <view class="calc-hr"></view>
+
+        <view class="calc-row">
+          <text class="calc-key">相对受压区高度</text>
+          <text class="calc-val">ξ = 1 − √(1 − 2αs) = {{ result.data.xi }}</text>
+        </view>
+        <view class="calc-hr"></view>
+
+        <view class="calc-row">
+          <text class="calc-key">内力臂系数</text>
+          <text class="calc-val">γs = 0.5·(1 + √(1 − 2αs)) = {{ result.data.gamma_s }}</text>
+        </view>
+        <view class="calc-hr"></view>
+
+        <view class="calc-row">
+          <text class="calc-key">配筋面积</text>
+          <text class="calc-val">As = M / (fy·γs·h₀) = {{ result.data.as_req }} mm²</text>
+        </view>
+        <view class="calc-hr"></view>
+
+        <view class="calc-row">
+          <text class="calc-key">配筋率</text>
+          <text class="calc-val">ρ = {{ result.data.as_req }} / ({{ form.b }} × {{ result.data.h0 }}) = {{ (result.data.as_req / (form.b * result.data.h0)).toFixed(4) }}</text>
+        </view>
+        <view class="calc-hr"></view>
+
+        <view class="calc-row">
+          <text class="calc-key">最小配筋</text>
+          <text class="calc-val">As_min = ρ_min·b·h = {{ result.data.as_min }} mm² (ρ_min = {{ result.data.rho_min }})</text>
+        </view>
+        <view class="calc-hr"></view>
+
+        <view class="calc-row">
+          <text class="calc-key">单筋上限</text>
+          <text class="calc-val">As_max = ξb·α₁·fc·b·h₀/fy = {{ result.data.as_max }} mm²</text>
+        </view>
+        <view class="calc-hr"></view>
+
+        <view v-if="result.data.need_double" class="calc-row">
+          <text class="calc-key">受压钢筋</text>
+          <text class="calc-val" style="color:#C62828;">需双筋截面，As' = {{ result.data.as_prime_req }} mm²</text>
+        </view>
+        <view v-if="result.data.need_double" class="calc-hr"></view>
       </view>
 
       <!-- 选筋方案 -->
-      <view class="scheme-title">📋 推荐选筋方案</view>
+      <view class="scheme-title">推荐选筋方案</view>
       <view class="scheme-list">
         <view
           class="scheme-item"
           v-for="(s, idx) in result.data.schemes"
           :key="idx"
         >
-          <view class="scheme-rank">方案{{ idx + 1 }}</view>
+          <view class="scheme-rank">{{ idx + 1 }}</view>
           <view class="scheme-desc">{{ s.desc }}</view>
           <view class="scheme-info">
-            <text class="scheme-area">{{ s.area }} mm²</text>
-            <text class="scheme-layout">· {{ s.layout }}</text>
+            <text>{{ s.area }} mm² · {{ s.layout }}</text>
           </view>
           <view class="scheme-diff" :class="s.area >= result.data.as_req ? 'diff-ok' : 'diff-under'">
             {{ s.area >= result.data.as_req ? '+' : '' }}{{ ((s.area - result.data.as_req) / result.data.as_req * 100).toFixed(1) }}%
           </view>
-        </view>
-      </view>
-
-      <!-- 计算步骤 -->
-      <view class="steps-toggle" @click="showSteps = !showSteps">
-        <text>📝 详细计算过程</text>
-        <text>{{ showSteps ? '▲' : '▼' }}</text>
-      </view>
-      <view class="steps-box" v-if="showSteps">
-        <view class="step-line" v-for="(step, idx) in result.data.steps" :key="idx">
-          {{ step }}
         </view>
       </view>
     </view>
@@ -314,77 +328,66 @@ export default {
   color: #999;
 }
 
-/* 参数网格 */
-.params-grid {
-  display: flex;
-  flex-wrap: wrap;
-  background: #FAFBFC;
-  border-radius: 12rpx;
-  padding: 20rpx;
-  margin-top: 20rpx;
+/* ========== 计算结果：简洁风格 ========== */
+.calc-hero {
+  text-align: center;
+  padding: 16rpx 0 24rpx;
 }
-
-.param-item {
-  width: 50%;
-  padding: 14rpx 0;
-}
-
-.param-label {
+.calc-hero-label {
   display: block;
-  font-size: 24rpx;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+.calc-hero-value {
+  display: block;
+  font-size: 56rpx;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 12rpx;
+}
+.calc-hero-unit {
+  font-size: 28rpx;
+  font-weight: 500;
   color: #999;
 }
 
-.param-value {
-  display: block;
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #333;
-  margin-top: 4rpx;
+.calc-process {
+  margin-top: 8rpx;
 }
-
-.text-warn {
-  color: #E65100;
-}
-
-/* 双筋提示 */
-.double-info {
-  background: #FFF8E1;
-  border-radius: 12rpx;
-  padding: 20rpx;
-  margin-top: 16rpx;
+.calc-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
+  padding: 16rpx 0;
 }
-
-.double-label {
+.calc-key {
+  width: 170rpx;
+  flex-shrink: 0;
   font-size: 26rpx;
-  color: #E65100;
+  color: #333;
   font-weight: 500;
 }
-
-.double-value {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #E65100;
+.calc-val {
+  flex: 1;
+  font-size: 26rpx;
+  color: #111;
+  line-height: 1.5;
 }
+.calc-hr {
+  height: 1rpx;
+  background: #E8E8E8;
+}
+
+.text-warn { color: #E65100; }
 
 /* 选筋方案 */
 .scheme-title {
   font-size: 28rpx;
   font-weight: 600;
   color: #333;
-  margin-top: 24rpx;
-  margin-bottom: 12rpx;
+  margin: 24rpx 0 12rpx;
 }
-
-.scheme-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12rpx;
-}
-
+.scheme-list { display: flex; flex-direction: column; gap: 12rpx; }
 .scheme-item {
   display: flex;
   align-items: center;
@@ -393,77 +396,20 @@ export default {
   padding: 20rpx;
   border: 2rpx solid transparent;
 }
-
-.scheme-item:first-child {
-  border-color: #2C6FCE;
-  background: #F0F6FF;
-}
-
+.scheme-item:first-child { border-color: #2C6FCE; background: #F0F6FF; }
 .scheme-rank {
-  font-size: 22rpx;
-  color: #fff;
+  width: 40rpx; height: 40rpx;
+  line-height: 40rpx; text-align: center;
+  font-size: 24rpx; font-weight: 700; color: #fff;
   background: #2C6FCE;
-  border-radius: 8rpx;
-  padding: 4rpx 12rpx;
+  border-radius: 50%;
   margin-right: 16rpx;
   flex-shrink: 0;
 }
-
-.scheme-item:first-child .scheme-rank {
-  background: #FF9800;
-}
-
-.scheme-desc {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #222;
-  margin-right: 12rpx;
-  flex-shrink: 0;
-}
-
-.scheme-info {
-  display: flex;
-  align-items: center;
-  font-size: 24rpx;
-  color: #999;
-  flex: 1;
-}
-
-.scheme-area {
-  font-weight: 600;
-  color: #555;
-}
-
-.scheme-layout {
-  color: #bbb;
-}
-
-.scheme-diff {
-  font-size: 24rpx;
-  font-weight: 700;
-  padding: 4rpx 14rpx;
-  border-radius: 16rpx;
-  flex-shrink: 0;
-}
-
-.diff-ok {
-  background: #E8F5E9;
-  color: #2E7D32;
-}
-
-.diff-under {
-  background: #FFEBEE;
-  color: #C62828;
-}
-
-/* 步骤折叠 */
-.steps-toggle {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20rpx 0;
-  font-size: 28rpx;
-  color: #2C6FCE;
-  font-weight: 500;
-}
+.scheme-item:first-child .scheme-rank { background: #FF9800; }
+.scheme-desc { font-size: 30rpx; font-weight: 700; color: #222; margin-right: 12rpx; flex-shrink: 0; }
+.scheme-info { display: flex; align-items: center; font-size: 24rpx; color: #666; flex: 1; }
+.scheme-diff { font-size: 24rpx; font-weight: 700; padding: 4rpx 14rpx; border-radius: 16rpx; flex-shrink: 0; }
+.diff-ok { background: #E8F5E9; color: #2E7D32; }
+.diff-under { background: #FFEBEE; color: #C62828; }
 </style>

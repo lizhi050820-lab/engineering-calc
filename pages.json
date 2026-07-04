@@ -9,6 +9,46 @@
 			}
 		},
 		{
+			"path": "pages/category/concrete",
+			"style": {
+				"navigationBarTitleText": "混凝土结构设计",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/category/section",
+			"style": {
+				"navigationBarTitleText": "截面几何性质",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/category/soil",
+			"style": {
+				"navigationBarTitleText": "土力学计算",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/calculator/soil-three-phase",
+			"style": {
+				"navigationBarTitleText": "三相比例指标计算",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/calculator/darcy-law",
+			"style": {
+				"navigationBarTitleText": "达西定律渗透计算",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
 			"path": "pages/calculator/bearing",
 			"style": {
 				"navigationBarTitleText": "正截面承载力计算",
@@ -28,6 +68,22 @@
 			"path": "pages/calculator/rebar",
 			"style": {
 				"navigationBarTitleText": "配筋计算",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/calculator/section-props",
+			"style": {
+				"navigationBarTitleText": "截面几何性质计算",
+				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/calculator/composite-section",
+			"style": {
+				"navigationBarTitleText": "组合截面（平行移轴）",
 				"navigationBarBackgroundColor": "#2C6FCE",
 				"navigationBarTextStyle": "white"
 			}

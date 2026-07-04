@@ -118,3 +118,76 @@ export function calcSectionDesign(params) {
     data: params,
   })
 }
+
+/**
+ * 截面几何性质计算
+ * @param {Object} params
+ * @param {string} params.shape - 截面形状: "rectangle"|"t-section"|"circle"|"annular"|"i-beam"
+ * @param {number} [params.b] - 宽度 (mm) — 矩形
+ * @param {number} [params.h] - 高度 (mm) — 矩形/T形/工字钢
+ * @param {number} [params.b_f] - 翼缘宽度 (mm) — T形/工字钢
+ * @param {number} [params.h_f] - 翼缘厚度 (mm) — T形
+ * @param {number} [params.b_w] - 腹板宽度 (mm) — T形
+ * @param {number} [params.t_f] - 翼缘厚度 (mm) — 工字钢
+ * @param {number} [params.t_w] - 腹板厚度 (mm) — 工字钢
+ * @param {number} [params.d] - 直径 (mm) — 圆形; 内径 (mm) — 环形
+ * @param {number} [params.D] - 外径 (mm) — 环形
+ */
+export function calcSectionProperties(params) {
+  return request('/api/calculate/section-properties', {
+    method: 'POST',
+    data: params,
+  })
+}
+
+/**
+ * 组合截面几何性质计算（平行移轴公式）
+ * @param {Object[]} params.blocks - 矩形分块列表
+ * @param {number} params.blocks[].b - 宽度 (mm)
+ * @param {number} params.blocks[].h - 高度 (mm)
+ * @param {number} params.blocks[].y0 - 底边距参考轴距离 (mm)
+ * @param {number} [params.blocks[].x0] - 左边距参考轴距离 (mm)，默认 0
+ * @param {boolean} [params.blocks[].is_hole] - 是否为孔洞
+ * @param {string} [params.blocks[].label] - 分块名称
+ */
+export function calcCompositeSection(params) {
+  return request('/api/calculate/composite-section', {
+    method: 'POST',
+    data: params,
+  })
+}
+
+/**
+ * 土力学三相比例指标计算
+ * @param {Object} params - 已知指标（任意子集，通常 ≥3 个）
+ * @param {number} [params.Gs] - 土粒比重
+ * @param {number} [params.w] - 含水量（小数）
+ * @param {number} [params.gamma] - 天然重度 (kN/m³)
+ * @param {number} [params.gamma_d] - 干重度 (kN/m³)
+ * @param {number} [params.gamma_sat] - 饱和重度 (kN/m³)
+ * @param {number} [params.gamma_prime] - 有效重度 (kN/m³)
+ * @param {number} [params.e] - 孔隙比
+ * @param {number} [params.n] - 孔隙率（小数）
+ * @param {number} [params.Sr] - 饱和度（小数）
+ * @param {number} [params.rho] - 天然密度 (g/cm³)
+ * @param {number} [params.rho_d] - 干密度 (g/cm³)
+ * @param {number} [params.rho_sat] - 饱和密度 (g/cm³)
+ * @param {number} [params.gamma_w] - 水的重度，默认 9.81
+ */
+export function calcSoilThreePhase(params) {
+  return request('/api/calculate/soil-three-phase', {
+    method: 'POST',
+    data: params,
+  })
+}
+
+/**
+ * 达西定律渗透计算
+ * @param {Object} params - 已知参数（任意子集）
+ */
+export function calcDarcyLaw(params) {
+  return request('/api/calculate/darcy-law', {
+    method: 'POST',
+    data: params,
+  })
+}

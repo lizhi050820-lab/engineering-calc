@@ -32,6 +32,26 @@ from calculators.shear_capacity import (
     STIRRUP_FYV,
 )
 
+from calculators.section_properties import (
+    SectionPropertiesInput,
+    calculate_section_properties,
+)
+
+from calculators.composite_section import (
+    CompositeBlock,
+    calculate_composite_section,
+)
+
+from calculators.soil_three_phase import (
+    SoilThreePhaseInput,
+    calculate_soil_three_phase,
+)
+
+from calculators.darcy_law import (
+    DarcyLawInput,
+    calculate_darcy_law,
+)
+
 app = FastAPI(
     title="土木工程计算工具箱",
     description="Civil Engineering Calculation Toolkit — 正截面承载力 · 配筋计算",
@@ -147,6 +167,92 @@ class ReinforcementResponse(BaseModel):
     message: str
 
 
+class SectionPropertiesRequest(BaseModel):
+    """截面几何性质计算请求"""
+    shape: Literal["rectangle", "t-section", "circle", "annular", "i-beam"] = Field(
+        ..., description="截面形状",
+    )
+    b: Optional[float] = Field(default=None, gt=0, description="宽度 (mm) — 矩形", examples=[200])
+    h: Optional[float] = Field(default=None, gt=0, description="高度 (mm) — 矩形/T形/工字钢", examples=[400])
+    b_f: Optional[float] = Field(default=None, gt=0, description="翼缘宽度 (mm) — T形/工字钢", examples=[400])
+    h_f: Optional[float] = Field(default=None, gt=0, description="翼缘厚度 (mm) — T形", examples=[100])
+    b_w: Optional[float] = Field(default=None, gt=0, description="腹板宽度 (mm) — T形", examples=[200])
+    t_f: Optional[float] = Field(default=None, gt=0, description="翼缘厚度 (mm) — 工字钢", examples=[20])
+    t_w: Optional[float] = Field(default=None, gt=0, description="腹板厚度 (mm) — 工字钢", examples=[12])
+    d: Optional[float] = Field(default=None, gt=0, description="直径 (mm) — 圆形; 内径 (mm) — 环形", examples=[200])
+    D: Optional[float] = Field(default=None, gt=0, description="外径 (mm) — 环形", examples=[200])
+
+
+class SectionPropertiesResponse(BaseModel):
+    """截面几何性质计算结果响应"""
+    success: bool = True
+    data: dict
+    message: str
+
+
+class BlockItem(BaseModel):
+    """组合截面 — 单个矩形分块"""
+    b: float = Field(..., gt=0, description="宽度 (mm)", examples=[200])
+    h: float = Field(..., gt=0, description="高度 (mm)", examples=[20])
+    y0: float = Field(..., ge=0, description="底边距参考轴距离 (mm)", examples=[120])
+    x0: float = Field(default=0.0, ge=0, description="左边距参考轴距离 (mm)", examples=[0])
+    is_hole: bool = Field(default=False, description="是否为孔洞（负面积）")
+    label: str = Field(default="", description="分块名称", examples=["上翼缘"])
+
+
+class CompositeSectionRequest(BaseModel):
+    """组合截面几何性质计算请求"""
+    blocks: List[BlockItem] = Field(..., min_length=1, description="矩形分块列表")
+
+
+class DarcyLawRequest(BaseModel):
+    """达西定律渗透计算请求 — 全部可选"""
+    k: Optional[float] = Field(default=None, gt=0, description="渗透系数 (m/s)")
+    i: Optional[float] = Field(default=None, ge=0, description="水力梯度")
+    delta_h: Optional[float] = Field(default=None, ge=0, description="水头差 (m)")
+    L: Optional[float] = Field(default=None, gt=0, description="渗径长度 (m)")
+    Q: Optional[float] = Field(default=None, ge=0, description="渗流量 (m³/s)")
+    v: Optional[float] = Field(default=None, ge=0, description="渗透速度 (m/s)")
+    A: Optional[float] = Field(default=None, gt=0, description="截面积 (m²)")
+    t: Optional[float] = Field(default=None, gt=0, description="时间 (s)")
+    a: Optional[float] = Field(default=None, gt=0, description="细管截面积 (cm²) — 变水头")
+    h1: Optional[float] = Field(default=None, gt=0, description="初始水头 (cm)")
+    h2: Optional[float] = Field(default=None, gt=0, description="终止水头 (cm)")
+    j: Optional[float] = Field(default=None, ge=0, description="单位渗透力 (kN/m³)")
+    J: Optional[float] = Field(default=None, ge=0, description="总渗透力 (kN)")
+    V: Optional[float] = Field(default=None, gt=0, description="土体体积 (m³)")
+    i_cr: Optional[float] = Field(default=None, ge=0, description="临界水力梯度")
+    gamma_prime: Optional[float] = Field(default=None, gt=0, description="有效重度 (kN/m³)")
+    Gs: Optional[float] = Field(default=None, gt=0, description="土粒比重")
+    e: Optional[float] = Field(default=None, ge=0, description="孔隙比")
+    Fs: Optional[float] = Field(default=None, ge=0, description="安全系数")
+    gamma_w: float = Field(default=9.81, gt=0, description="水的重度 (kN/m³)")
+    k_unit: str = Field(default="m/s", description="渗透系数输入单位: m/s, cm/s, m/d")
+
+
+class DarcyLawLayer(BaseModel):
+    """成层土 — 单层参数"""
+    k_val: float = Field(..., gt=0, description="该层渗透系数")
+    H: float = Field(..., gt=0, description="该层厚度 (m)")
+
+
+class SoilThreePhaseRequest(BaseModel):
+    """土力学三相比例指标计算请求"""
+    Gs: Optional[float] = Field(default=None, gt=0, description="土粒比重（相对密度）", examples=[2.70])
+    w: Optional[float] = Field(default=None, ge=0, description="含水量（小数，如 0.15=15%）", examples=[0.15])
+    gamma: Optional[float] = Field(default=None, gt=0, description="天然重度 (kN/m³)", examples=[18.5])
+    gamma_d: Optional[float] = Field(default=None, gt=0, description="干重度 (kN/m³)")
+    gamma_sat: Optional[float] = Field(default=None, gt=0, description="饱和重度 (kN/m³)")
+    gamma_prime: Optional[float] = Field(default=None, gt=0, description="有效重度 (kN/m³)")
+    e: Optional[float] = Field(default=None, ge=0, description="孔隙比")
+    n: Optional[float] = Field(default=None, ge=0, lt=1, description="孔隙率（小数）")
+    Sr: Optional[float] = Field(default=None, ge=0, le=1, description="饱和度（小数，1.0=完全饱和）")
+    rho: Optional[float] = Field(default=None, gt=0, description="天然密度 (g/cm³)")
+    rho_d: Optional[float] = Field(default=None, gt=0, description="干密度 (g/cm³)")
+    rho_sat: Optional[float] = Field(default=None, gt=0, description="饱和密度 (g/cm³)")
+    gamma_w: float = Field(default=9.81, gt=0, description="水的重度 (kN/m³)，考试常用10")
+
+
 class MaterialReferenceResponse(BaseModel):
     """材料参数参考表"""
     success: bool = True
@@ -167,10 +273,13 @@ def root():
         "version": "0.1.0",
         "docs": "/docs",
         "endpoints": [
-            "POST /api/calculate/section-design     截面设计（正截面+斜截面）",
-            "POST /api/calculate/bearing-capacity  正截面承载力计算",
-            "POST /api/calculate/reinforcement      配筋计算",
-            "GET  /api/references                    材料参数参考表",
+            "POST /api/calculate/section-design      截面设计（正截面+斜截面）",
+            "POST /api/calculate/bearing-capacity   正截面承载力计算",
+            "POST /api/calculate/reinforcement       配筋计算",
+            "POST /api/calculate/section-properties  截面几何性质计算",
+            "POST /api/calculate/composite-section   组合截面（平行移轴）",
+            "POST /api/calculate/soil-three-phase   土力学三相指标计算",
+            "GET  /api/references                     材料参数参考表",
         ],
     }
 
@@ -292,11 +401,14 @@ class SectionDesignRequest(BaseModel):
     concrete_grade: str = Field(default="C30", description="混凝土强度等级")
     rebar_grade: str = Field(default="HRB400", description="纵筋牌号")
     stirrup_grade: str = Field(default="HPB300", description="箍筋牌号")
-    a_s: float = Field(default=40.0, ge=20, le=100, description="纵筋保护层厚度 (mm)")
+    a_s: float = Field(default=40.0, ge=20, le=100, description="受拉纵筋保护层厚度 (mm)")
+    a_s_prime: float = Field(default=40.0, ge=20, le=100, description="受压纵筋保护层厚度 (mm)")
+    as_type: Literal["single", "double"] = Field(default="single", description="配筋类型: single=单筋, double=双筋")
     load_type: Literal["uniform", "concentrated"] = Field(default="uniform", description="荷载类型")
     shear_span_ratio: Optional[float] = Field(default=None, ge=1.5, le=3.0, description="剪跨比 (集中荷载时必填)")
     # 正截面校核（可选）
     as_given: Optional[float] = Field(default=None, gt=0, description="已知受拉钢筋面积 (mm²)")
+    as_prime_given: Optional[float] = Field(default=None, gt=0, description="已知受压钢筋面积 (mm²)，双筋校核时填写")
     # 斜截面校核（可选）
     stirrup_diameter: Optional[float] = Field(default=None, ge=6, le=12, description="箍筋直径 (mm)")
     stirrup_legs: int = Field(default=2, ge=1, le=4, description="箍筋肢数")
@@ -342,9 +454,10 @@ def api_section_design(req: SectionDesignRequest):
             b=req.b, h=req.h,
             concrete_grade=req.concrete_grade,
             rebar_grade=req.rebar_grade,
-            a_s=req.a_s, a_s_prime=req.a_s,
-            as_type="single",
+            a_s=req.a_s, a_s_prime=req.a_s_prime,
+            as_type=req.as_type,
             as_given=req.as_given,
+            as_prime_given=req.as_prime_given,
         )
         flex_result = calculate_bearing_capacity(flex_inp)
 
@@ -407,6 +520,246 @@ def api_section_design(req: SectionDesignRequest):
                 "shear": shear_data,
             },
         }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/calculate/section-properties", response_model=SectionPropertiesResponse)
+def api_section_properties(req: SectionPropertiesRequest):
+    """
+    截面几何性质计算
+
+    支持五种截面形状：矩形、T形、圆形、环形、工字钢。
+    根据所选形状填写对应尺寸参数，计算：
+    - 面积 A
+    - 惯性矩 I_x, I_y
+    - 抵抗矩 W_x, W_y
+    - 回转半径 i_x, i_y
+    - 面积矩 S_x
+    """
+    try:
+        inp = SectionPropertiesInput(
+            shape=req.shape,
+            b=req.b or 0.0,
+            h=req.h or 0.0,
+            b_f=req.b_f or 0.0,
+            h_f=req.h_f or 0.0,
+            b_w=req.b_w or 0.0,
+            t_f=req.t_f or 0.0,
+            t_w=req.t_w or 0.0,
+            d=req.d or 0.0,
+            D=req.D or 0.0,
+        )
+        result = calculate_section_properties(inp)
+
+        data = {
+            "shape": result.shape,
+            "A": result.A,
+            "I_x": result.I_x,
+            "I_y": result.I_y,
+            "W_x": result.W_x,
+            "W_y": result.W_y,
+            "i_x": result.i_x,
+            "i_y": result.i_y,
+            "S_x": result.S_x,
+            "y_c": result.y_c,
+            "I_p": result.I_p,
+            "steps": result.steps,
+            "status": result.status,
+        }
+
+        return SectionPropertiesResponse(
+            success=True,
+            data=data,
+            message=result.message,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/calculate/composite-section")
+def api_composite_section(req: CompositeSectionRequest):
+    """
+    组合截面几何性质计算（平行移轴公式）
+
+    用户自定义若干矩形分块（含孔洞），以底边为参考轴，
+    通过平行移轴公式计算组合截面的形心位置和惯性矩。
+
+    返回：
+    - 组合形心位置 y_bar
+    - 惯性矩 I_z, I_y
+    - 抵抗矩 W_z_top, W_z_bot, W_y
+    - 回转半径 i_z, i_y
+    - 面积矩 S_z
+    - 各分块计算明细表
+    """
+    try:
+        blocks = []
+        for item in req.blocks:
+            blocks.append(CompositeBlock(
+                b=item.b,
+                h=item.h,
+                y0=item.y0,
+                x0=item.x0,
+                is_hole=item.is_hole,
+                label=item.label,
+            ))
+
+        result = calculate_composite_section(blocks)
+
+        data = {
+            "shape": "composite",
+            "n_blocks": result.n_blocks,
+            "n_holes": result.n_holes,
+            "A": result.A,
+            "y_bar": result.y_bar,
+            "x_bar": result.x_bar,
+            "I_z": result.I_z,
+            "I_y": result.I_y,
+            "W_z_top": result.W_z_top,
+            "W_z_bot": result.W_z_bot,
+            "W_y": result.W_y,
+            "i_z": result.i_z,
+            "i_y": result.i_y,
+            "S_z": result.S_z,
+            "y_max": result.y_max,
+            "y_min": result.y_min,
+            "block_details": [
+                {
+                    "label": d.label,
+                    "b": d.b,
+                    "h": d.h,
+                    "y0": d.y0,
+                    "A": d.A,
+                    "y_ci": d.y_ci,
+                    "d_y": d.d_y,
+                    "I_zc": d.I_zc,
+                    "Ady2": d.Ady2,
+                    "I_z_contrib": d.I_z_contrib,
+                    "is_hole": d.is_hole,
+                }
+                for d in result.block_details
+            ],
+            "steps": result.steps,
+            "status": result.status,
+        }
+
+        return {
+            "success": True,
+            "data": data,
+            "message": result.message,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/calculate/soil-three-phase")
+def api_soil_three_phase(req: SoilThreePhaseRequest):
+    """
+    土力学三相比例指标计算
+
+    输入任意已知指标（通常 ≥3 个），系统通过约束传播推导所有未知指标。
+
+    核心公式基于三相草图法（令 V_s = 1），可推导:
+    - 试验指标: Gs, w, γ
+    - 换算指标: e, n, Sr, γ_d, γ_sat, γ'
+    - 密度指标: ρ, ρ_d, ρ_sat
+    """
+    try:
+        inp = SoilThreePhaseInput(
+            Gs=req.Gs,
+            w=req.w,
+            gamma=req.gamma,
+            gamma_d=req.gamma_d,
+            gamma_sat=req.gamma_sat,
+            gamma_prime=req.gamma_prime,
+            e=req.e,
+            n=req.n,
+            Sr=req.Sr,
+            rho=req.rho,
+            rho_d=req.rho_d,
+            rho_sat=req.rho_sat,
+            gamma_w=req.gamma_w,
+        )
+        result = calculate_soil_three_phase(inp)
+
+        data = {
+            "Gs": result.Gs,
+            "w": result.w,
+            "gamma": result.gamma,
+            "gamma_d": result.gamma_d,
+            "gamma_sat": result.gamma_sat,
+            "gamma_prime": result.gamma_prime,
+            "e": result.e,
+            "n": result.n,
+            "Sr": result.Sr,
+            "rho": result.rho,
+            "rho_d": result.rho_d,
+            "rho_sat": result.rho_sat,
+            "gamma_w": result.gamma_w,
+            "derivations": [
+                {"symbol": d.symbol, "value": d.value, "formula": d.formula, "unit": d.unit}
+                for d in result.derivations
+            ],
+            "missing": result.missing,
+        }
+
+        return {
+            "success": True,
+            "data": data,
+            "message": result.message,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/calculate/darcy-law")
+def api_darcy_law(req: DarcyLawRequest):
+    """
+    达西定律与渗透计算
+
+    输入任意已知参数，通过约束传播推导所有未知量。
+
+    涵盖:
+    - 达西定律: v = k·i, Q = k·i·A
+    - 常水头试验: k = Q·L/(A·Δh·t)
+    - 变水头试验: k = a·L/(A·t)·ln(h1/h2)
+    - 渗透力: j = γw·i, J = j·V
+    - 临界水力梯度: i_cr = γ'/γw = (Gs-1)/(1+e)
+    - 安全系数: Fs = i_cr/i
+    - 流土判别
+    """
+    try:
+        inp = DarcyLawInput(
+            k=req.k, i=req.i, delta_h=req.delta_h, L=req.L,
+            Q=req.Q, v=req.v, A=req.A, t=req.t,
+            a=req.a, h1=req.h1, h2=req.h2,
+            j=req.j, J=req.J, V=req.V,
+            i_cr=req.i_cr, gamma_prime=req.gamma_prime,
+            Gs=req.Gs, e=req.e, Fs=req.Fs,
+            gamma_w=req.gamma_w,
+        )
+        result = calculate_darcy_law(inp)
+
+        data = {
+            "k": result.k, "i": result.i,
+            "delta_h": result.delta_h, "L": result.L,
+            "Q": result.Q, "v": result.v,
+            "A": result.A, "t": result.t,
+            "a": result.a, "h1": result.h1, "h2": result.h2,
+            "j": result.j, "J": result.J, "V": result.V,
+            "i_cr": result.i_cr, "gamma_prime": result.gamma_prime,
+            "Gs": result.Gs, "e": result.e, "Fs": result.Fs,
+            "gamma_w": result.gamma_w,
+            "quicksand_risk": result.quicksand_risk,
+            "derivations": [
+                {"symbol": d.symbol, "value": d.value, "formula": d.formula, "unit": d.unit}
+                for d in result.derivations
+            ],
+            "missing": result.missing,
+        }
+
+        return {"success": True, "data": data, "message": result.message}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

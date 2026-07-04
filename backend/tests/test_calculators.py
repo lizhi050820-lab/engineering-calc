@@ -23,6 +23,10 @@ from calculators.shear_capacity import (
     ShearCapacityInput,
     get_beta_c, get_beta_h,
 )
+from calculators.section_properties import (
+    calculate_section_properties,
+    SectionPropertiesInput,
+)
 
 
 # =============================================================================
@@ -400,6 +404,32 @@ class TestAPI:
         assert data['data']['shear']['V_max'] > 0
         print(f"  [PASS] API 截面设计: Mu={data['data']['flexural']['mu']:.3f}, V_cs={data['data']['shear']['V_cs']:.3f}")
 
+    def test_section_properties_api(self):
+        """测试截面几何性质 API"""
+        from main import app
+        from fastapi.testclient import TestClient
+        client = TestClient(app)
+
+        # 矩形
+        resp = client.post('/api/calculate/section-properties', json={
+            'shape': 'rectangle', 'b': 200, 'h': 400,
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data['success'] is True
+        assert abs(data['data']['A'] - 80000) < 1
+        assert abs(data['data']['I_x'] - 1066666667) < 10000
+        print(f"  [PASS] API 截面性质-矩形: A={data['data']['A']}, I_x={data['data']['I_x']}")
+
+        # 圆形
+        resp = client.post('/api/calculate/section-properties', json={
+            'shape': 'circle', 'd': 200,
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data['data']['I_y'] == data['data']['I_x']
+        print(f"  [PASS] API 截面性质-圆形: I_x={data['data']['I_x']:.0f}, 对称验证通过")
+
 
 # =============================================================================
 # 斜截面承载力测试
@@ -515,6 +545,169 @@ class TestShearCapacity:
 
 
 # =============================================================================
+# 截面几何性质测试
+# =============================================================================
+
+class TestSectionProperties:
+    """截面几何性质计算测试"""
+
+    def test_rectangle_200x400(self):
+        """矩形 200×400
+        手算:
+          A = 200×400 = 80000 mm²
+          I_x = 200×400³/12 = 200×64000000/12 = 1,066,666,667 mm⁴
+          I_y = 400×200³/12 = 400×8000000/12 = 266,666,667 mm⁴
+          W_x = 200×400²/6 = 200×160000/6 = 5,333,333 mm³
+          W_y = 400×200²/6 = 400×40000/6 = 2,666,667 mm³
+          i_x = 400/√12 = 115.47 mm
+          i_y = 200/√12 = 57.74 mm
+          S_x = 200×400²/8 = 4,000,000 mm³
+        """
+        inp = SectionPropertiesInput(shape='rectangle', b=200, h=400)
+        r = calculate_section_properties(inp)
+
+        assert r.status == 'ok'
+        assert abs(r.A - 80000) < 1, f"A: {r.A}"
+        assert abs(r.I_x - 1066666667) < 10000, f"I_x: {r.I_x}"
+        assert abs(r.I_y - 266666667) < 10000, f"I_y: {r.I_y}"
+        assert abs(r.W_x - 5333333) < 100, f"W_x: {r.W_x}"
+        assert abs(r.W_y - 2666667) < 100, f"W_y: {r.W_y}"
+        assert abs(r.i_x - 115.47) < 0.1, f"i_x: {r.i_x}"
+        assert abs(r.i_y - 57.74) < 0.1, f"i_y: {r.i_y}"
+        assert abs(r.S_x - 4000000) < 100, f"S_x: {r.S_x}"
+        print(f"  [PASS] 矩形200×400: A={r.A}, I_x={r.I_x:.0f}, W_x={r.W_x:.0f}, i_x={r.i_x}")
+
+    def test_circle_d200(self):
+        """圆形 d=200
+        手算:
+          A = π×200²/4 = 31,415.9 mm²
+          I_x = π×200⁴/64 = 78,539,816 mm⁴
+          W_x = π×200³/32 = 785,398 mm³
+          i_x = 200/4 = 50 mm
+          S_x = 200³/12 = 666,667 mm³
+        """
+        inp = SectionPropertiesInput(shape='circle', d=200)
+        r = calculate_section_properties(inp)
+
+        assert r.status == 'ok'
+        assert abs(r.A - 31415.9) < 1, f"A: {r.A}"
+        assert abs(r.I_x - 78539816) < 1000, f"I_x: {r.I_x}"
+        assert abs(r.I_y - r.I_x) < 1, f"I_y should == I_x"
+        assert abs(r.W_x - 785398) < 10, f"W_x: {r.W_x}"
+        assert abs(r.i_x - 50) < 0.1, f"i_x: {r.i_x}"
+        assert abs(r.S_x - 666667) < 100, f"S_x: {r.S_x}"
+        print(f"  [PASS] 圆形d=200: A={r.A}, I_x={r.I_x:.0f}, i_x={r.i_x}")
+
+    def test_annular_D200_d100(self):
+        """环形 D=200, d=100
+        手算:
+          A = π×(40000-10000)/4 = 23,561.9 mm²
+          I_x = π×(200⁴-100⁴)/64 = π×(1.6e9-1e8)/64 = 73,631,078 mm⁴
+          S_x = (200³-100³)/12 = (8e6-1e6)/12 = 583,333 mm³
+        """
+        inp = SectionPropertiesInput(shape='annular', D=200, d=100)
+        r = calculate_section_properties(inp)
+
+        assert r.status == 'ok'
+        assert abs(r.A - 23561.9) < 1, f"A: {r.A}"
+        assert abs(r.I_x - 73631078) < 1000, f"I_x: {r.I_x}"
+        assert abs(r.S_x - 583333) < 100, f"S_x: {r.S_x}"
+        # 内外径验证：环形 i 应介于实心圆和薄壁之间
+        # 实心圆 d=200: i=50; 环形: i=√(200²+100²)/4=55.9
+        assert abs(r.i_x - 55.9) < 0.1, f"i_x: {r.i_x} (expected ~55.9)"
+        print(f"  [PASS] 环形D200/d100: A={r.A}, I_x={r.I_x:.0f}, i_x={r.i_x}")
+
+    def test_t_section(self):
+        """T形截面: b_f=400, h_f=100, b_w=200, h=500
+        手算:
+          A = 400×100 + 200×400 = 120,000 mm²
+          y_c = [400×100×450 + 200×400×200] / 120000
+              = [18,000,000 + 16,000,000] / 120000 = 283.33 mm
+        """
+        inp = SectionPropertiesInput(
+            shape='t-section', b_f=400, h_f=100, b_w=200, h=500,
+        )
+        r = calculate_section_properties(inp)
+
+        assert r.status == 'ok'
+        assert abs(r.A - 120000) < 1, f"A: {r.A}"
+        assert abs(r.y_c - 283.3) < 1.0, f"y_c: {r.y_c} (expected ~283.3)"
+        # I_x 应大于同尺寸矩形的一半（T形材料偏上，惯性矩偏小）
+        rect_I_x = 400 * 500**3 / 12  # 整个矩形
+        assert r.I_x < rect_I_x, f"I_x should be < full rectangle ({rect_I_x:.0f})"
+        assert r.I_x > rect_I_x * 0.3, f"I_x should be > 30% of full rectangle"
+        print(f"  [PASS] T形: A={r.A}, y_c={r.y_c}, I_x={r.I_x:.0f}, W_x={r.W_x:.0f}")
+
+    def test_i_beam(self):
+        """工字钢: b_f=300, h=400, t_f=20, t_w=12
+        手算:
+          h_w = 400 - 2×20 = 360
+          A = 2×300×20 + 360×12 = 12000 + 4320 = 16,320 mm²
+          I_x = 300×400³/12 - (300-12)×360³/12
+              = 300×64e6/12 - 288×46.656e6/12
+              = 1,600,000,000 - 1,119,744,000 = 480,256,000
+        """
+        inp = SectionPropertiesInput(
+            shape='i-beam', b_f=300, h=400, t_f=20, t_w=12,
+        )
+        r = calculate_section_properties(inp)
+
+        assert r.status == 'ok'
+        assert abs(r.A - 16320) < 1, f"A: {r.A}"
+        I_x_exp = 300*400**3/12 - (300-12)*(400-2*20)**3/12
+        assert abs(r.I_x - I_x_exp) < 10000, f"I_x: {r.I_x} (expected {I_x_exp:.0f})"
+        # 双轴对称: y_c = h/2
+        assert abs(r.y_c - 200) < 0.1, f"y_c: {r.y_c} (expected 200)"
+        print(f"  [PASS] 工字钢: A={r.A}, I_x={r.I_x:.0f}, I_y={r.I_y:.0f}, W_x={r.W_x:.0f}")
+
+    def test_symmetry_circle(self):
+        """圆形截面：I_x==I_y, W_x==W_y, i_x==i_y"""
+        inp = SectionPropertiesInput(shape='circle', d=300)
+        r = calculate_section_properties(inp)
+
+        assert r.I_x == r.I_y, f"I_x({r.I_x}) should equal I_y({r.I_y})"
+        assert r.W_x == r.W_y, f"W_x should equal W_y"
+        assert r.i_x == r.i_y, f"i_x should equal i_y"
+        print(f"  [PASS] 圆形对称性: I_x=I_y={r.I_x:.0f}, i_x=i_y={r.i_x}")
+
+    def test_rectangle_i_x_vs_i_y(self):
+        """矩形 b > h 时 I_y > I_x"""
+        inp = SectionPropertiesInput(shape='rectangle', b=600, h=300)
+        r = calculate_section_properties(inp)
+
+        assert r.I_y > r.I_x, f"For b>h, I_y({r.I_y}) should > I_x({r.I_x})"
+        assert r.i_y > r.i_x, f"For b>h, i_y({r.i_y}) should > i_x({r.i_x})"
+        print(f"  [PASS] b>h矩形: I_x={r.I_x:.0f}, I_y={r.I_y:.0f}, I_y > I_x OK")
+
+    def test_invalid_shape(self):
+        """不支持的截面形状应抛出 ValueError"""
+        try:
+            inp = SectionPropertiesInput(shape='triangle')
+            calculate_section_properties(inp)
+            assert False, "Should have raised ValueError"
+        except ValueError as e:
+            print(f"  [PASS] 无效形状检测: {e}")
+
+    def test_validation_missing_params(self):
+        """缺少必要参数应抛出 ValueError"""
+        # 矩形缺少 h
+        try:
+            inp = SectionPropertiesInput(shape='rectangle', b=200, h=0)
+            calculate_section_properties(inp)
+            assert False, "Should have raised ValueError for h=0"
+        except ValueError as e:
+            print(f"  [PASS] 参数校验: h=0 → ValueError")
+
+        # 环形内径大于外径
+        try:
+            inp = SectionPropertiesInput(shape='annular', D=100, d=200)
+            calculate_section_properties(inp)
+            assert False, "Should have raised ValueError for d > D"
+        except ValueError as e:
+            print(f"  [PASS] 参数校验: d>D → ValueError")
+
+
+# =============================================================================
 # 运行所有测试
 # =============================================================================
 
@@ -527,6 +720,7 @@ if __name__ == '__main__':
     tests_rebar = TestReinforcement()
     tests_shear = TestShearCapacity()
     tests_api = TestAPI()
+    tests_section = TestSectionProperties()
 
     all_passed = 0
     all_total = 0
@@ -566,6 +760,16 @@ if __name__ == '__main__':
         if name.startswith('test_'):
             try:
                 getattr(tests_api, name)()
+                all_passed += 1
+            except Exception as e:
+                print(f"  [FAIL] {name} FAILED: {e}")
+            all_total += 1
+
+    print()
+    for name in dir(tests_section):
+        if name.startswith('test_'):
+            try:
+                getattr(tests_section, name)()
                 all_passed += 1
             except Exception as e:
                 print(f"  [FAIL] {name} FAILED: {e}")

@@ -99,40 +99,25 @@ page {
   color: #999;
 }
 
-/* 结果区 */
-.result-card {
-  background: linear-gradient(135deg, #EBF3FF, #F0F7FF);
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-top: 20rpx;
-  border-left: 8rpx solid #2C6FCE;
+/* Grid布局 */
+.grid-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
 }
 
-.result-value {
-  font-size: 48rpx;
-  font-weight: 700;
-  color: #2C6FCE;
-  text-align: center;
-  margin: 16rpx 0;
+.grid-2 > .form-group {
+  flex: 1 1 calc(50% - 8rpx);
+  min-width: 200rpx;
 }
 
-.result-unit {
-  font-size: 28rpx;
-  color: #999;
-}
-
-.result-label {
-  font-size: 26rpx;
-  color: #666;
-  text-align: center;
-}
-
+/* 状态标签 */
 .status-tag {
   display: inline-block;
   padding: 6rpx 20rpx;
   border-radius: 24rpx;
   font-size: 24rpx;
-  margin: 12rpx auto;
+  font-weight: 500;
 }
 
 .status-ok {
@@ -150,32 +135,53 @@ page {
   color: #C62828;
 }
 
-/* 公式步骤展开 */
-.steps-box {
-  background: #fff;
-  border-radius: 12rpx;
-  padding: 24rpx;
-  margin-top: 16rpx;
+/* 计算结果 — 简洁风格 */
+.calc-hero {
+  text-align: center;
+  padding: 16rpx 0 24rpx;
+}
+.calc-hero-label {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+.calc-hero-value {
+  display: block;
+  font-size: 56rpx;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 12rpx;
+}
+.calc-hero-unit {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #999;
 }
 
-.step-line {
-  font-family: 'Courier New', monospace;
-  font-size: 24rpx;
-  color: #555;
-  line-height: 1.8;
-  padding: 4rpx 0;
-  border-bottom: 1rpx dashed #eee;
+.calc-process {
+  margin-top: 8rpx;
 }
-
-/* Grid布局 */
-.grid-2 {
+.calc-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
+  align-items: baseline;
+  padding: 16rpx 0;
 }
-
-.grid-2 > .form-group {
-  flex: 1 1 calc(50% - 8rpx);
-  min-width: 200rpx;
+.calc-key {
+  width: 170rpx;
+  flex-shrink: 0;
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+.calc-val {
+  flex: 1;
+  font-size: 26rpx;
+  color: #111;
+  line-height: 1.5;
+}
+.calc-hr {
+  height: 1rpx;
+  background: #E8E8E8;
 }
 </style>
