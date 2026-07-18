@@ -266,30 +266,21 @@ def calculate_composite_section(blocks: List[CompositeBlock]) -> CompositeSectio
     # --- 面积矩（中性轴以上部分对中性轴的静矩） ---
     S_z = 0.0
     for blk in blocks:
+        sign = -1 if blk.is_hole else 1
         y_top_i = blk.y0 + blk.h   # 分块顶边
         y_bot_i = blk.y0           # 分块底边
 
         if y_bot_i >= y_bar:
             # 整个分块在中性轴以上
             y_ci = blk.y0 + blk.h / 2
-            S_z += blk.b * blk.h * (y_ci - y_bar)
+            S_z += sign * blk.b * blk.h * (y_ci - y_bar)
         elif y_top_i <= y_bar:
             # 整个分块在中性轴以下，不计入 S_z（取上方部分即可）
             pass
         else:
             # 中性轴穿过该分块，仅取中性轴以上部分
             h_above = y_top_i - y_bar
-            S_z += blk.b * h_above * (h_above / 2)
-
-        if blk.is_hole:
-            # 孔洞同样处理但变号
-            # 简单起见，若孔洞完全在中性轴以上则扣除
-            if y_bot_i >= y_bar:
-                y_ci = blk.y0 + blk.h / 2
-                S_z -= blk.b * blk.h * (y_ci - y_bar)
-            elif y_top_i > y_bar:
-                h_above = y_top_i - y_bar
-                S_z -= blk.b * h_above * (h_above / 2)
+            S_z += sign * blk.b * h_above * (h_above / 2)
 
     S_z = abs(S_z)  # 面积矩取正值
 

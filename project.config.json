@@ -1,0 +1,24 @@
+{
+  "description": "土木工程计算工具箱微信小程序",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "",
+  "appid": "wx1371fdaae8c8e216",
+  "projectname": "engineering-calc",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "bigPackageSizeSupport": true
+  },
+  "packOptions": {
+    "ignore": []
+  },
+  "condition": {
+    "miniprogram": {
+      "current": -1,
+      "list": []
+    }
+  }
+}

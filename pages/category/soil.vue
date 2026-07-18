@@ -1,10 +1,11 @@
 <template>
   <view class="container">
+    <view class="category-intro"><view class="intro-kicker">GEOTECHNICS</view><view class="intro-title">土力学计算</view><view class="intro-desc">土体指标推导与渗流计算，过程清晰可追溯</view></view>
     <view class="tool-list">
       <!-- 三相比例指标 -->
       <view class="tool-card" @click="goTo('/pages/calculator/soil-three-phase')">
         <view class="tool-icon-wrap bg-brown">
-          <text class="tool-icon">🧪</text>
+          <text class="tool-icon">3P</text>
         </view>
         <view class="tool-info">
           <view class="tool-name">三相比例指标计算</view>
@@ -16,7 +17,7 @@
       <!-- 达西定律 -->
       <view class="tool-card" @click="goTo('/pages/calculator/darcy-law')">
         <view class="tool-icon-wrap bg-blue2">
-          <text class="tool-icon">💧</text>
+          <text class="tool-icon">K</text>
         </view>
         <view class="tool-info">
           <view class="tool-name">达西定律渗透计算</view>
@@ -41,27 +42,26 @@ export default {
 </script>
 
 <style scoped>
-.container { padding: 20rpx 0 40rpx; }
+.container { padding: 0 0 40rpx; }.category-intro{background:#123F43;color:#fff;padding:42rpx 34rpx 38rpx;border-radius:0 0 30rpx 30rpx;margin-bottom:24rpx}.intro-kicker{font-size:18rpx;letter-spacing:4rpx;color:rgba(255,255,255,.48)}.intro-title{font-size:42rpx;font-weight:750;margin-top:10rpx}.intro-desc{font-size:23rpx;color:rgba(255,255,255,.64);margin-top:10rpx}
 
 .tool-card {
-  display: flex; align-items: center; background: #fff;
+  display: flex; align-items: center; background: #FAF8F3;
   margin: 0 20rpx 16rpx; padding: 32rpx;
-  border-radius: 16rpx; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
+  border-radius: 22rpx; box-shadow: 0 8rpx 24rpx rgba(18,63,67,.06);
 }
-.tool-card:active { transform: scale(0.98); background: #FAFBFC; }
+.tool-card:active { transform: scale(0.98); background: #F2F1EC; }
 
 .tool-icon-wrap {
   width: 96rpx; height: 96rpx; border-radius: 24rpx;
   display: flex; align-items: center; justify-content: center;
   margin-right: 24rpx; flex-shrink: 0;
 }
-.bg-brown { background: linear-gradient(135deg, #EFEBE9, #D7CCC8); }
-.bg-blue2 { background: linear-gradient(135deg, #E0F2FF, #B3E5FC); }
-.tool-icon { font-size: 44rpx; }
+.bg-brown,.bg-blue2 { background: #E0EFED; }
+.tool-icon { font-size: 24rpx;font-weight:800;color:#14575B }
 
 .tool-info { flex: 1; }
-.tool-name { font-size: 32rpx; font-weight: 600; color: #222; margin-bottom: 8rpx; }
-.tool-desc { font-size: 24rpx; color: #999; }
+.tool-name { font-size: 32rpx; font-weight: 650; color: #17383A; margin-bottom: 8rpx; }
+.tool-desc { font-size: 24rpx; color: #7C8987; }
 .tool-arrow { font-size: 40rpx; color: #ccc; margin-left: 12rpx; }
 
 .soon-notice {

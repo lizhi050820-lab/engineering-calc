@@ -24,7 +24,7 @@
         <view v-if="form.shape === 't-section'" class="cad-diagram">
           <view class="cad-dim-top">
             <view class="cad-tick cad-tick-h"></view>
-            <text class="cad-dim">b_f = {{ form.b_f || '?' }}</text>
+            <text class="cad-dim">b𝒻 = {{ form.b_f || '?' }}</text>
             <view class="cad-tick cad-tick-h"></view>
           </view>
           <view class="cad-row">
@@ -35,10 +35,10 @@
             </view>
             <view class="cad-frame-t">
               <view class="cad-t-flange">
-                <text class="cad-dim-inner">h_f={{ form.h_f || '?' }}</text>
+                <text class="cad-dim-inner">h𝒻 = {{ form.h_f || '?' }}</text>
               </view>
               <view class="cad-t-web">
-                <text class="cad-dim-inner">b_w={{ form.b_w || '?' }}</text>
+                <text class="cad-dim-inner">bw = {{ form.b_w || '?' }}</text>
               </view>
             </view>
           </view>
@@ -75,7 +75,7 @@
         <view v-if="form.shape === 'i-beam'" class="cad-diagram">
           <view class="cad-dim-top">
             <view class="cad-tick cad-tick-h"></view>
-            <text class="cad-dim">b_f = {{ form.b_f_ibeam || '?' }}</text>
+            <text class="cad-dim">b𝒻 = {{ form.b_f_ibeam || '?' }}</text>
             <view class="cad-tick cad-tick-h"></view>
           </view>
           <view class="cad-row">
@@ -86,10 +86,10 @@
             </view>
             <view class="cad-frame-i">
               <view class="cad-i-flange-top">
-                <text class="cad-dim-inner">t_f={{ form.t_f || '?' }}</text>
+                <text class="cad-dim-inner">t𝒻 = {{ form.t_f || '?' }}</text>
               </view>
               <view class="cad-i-web">
-                <text class="cad-dim-inner">t_w={{ form.t_w || '?' }}</text>
+                <text class="cad-dim-inner">tw = {{ form.t_w || '?' }}</text>
               </view>
               <view class="cad-i-flange-bot"></view>
             </view>
@@ -126,17 +126,17 @@
       <view v-if="form.shape === 't-section'">
         <view class="grid-2">
           <view class="form-group">
-            <text class="form-label">翼缘宽 b_f</text>
+            <text class="form-label">翼缘宽 b𝒻</text>
             <input class="form-input" v-model.number="form.b_f" type="digit" placeholder="mm" />
           </view>
           <view class="form-group">
-            <text class="form-label">翼缘厚 h_f</text>
+            <text class="form-label">翼缘厚 h𝒻</text>
             <input class="form-input" v-model.number="form.h_f" type="digit" placeholder="mm" />
           </view>
         </view>
         <view class="grid-2">
           <view class="form-group">
-            <text class="form-label">腹板宽 b_w</text>
+            <text class="form-label">腹板宽 bw</text>
             <input class="form-input" v-model.number="form.b_w" type="digit" placeholder="mm" />
           </view>
           <view class="form-group">
@@ -170,7 +170,7 @@
       <view v-if="form.shape === 'i-beam'">
         <view class="grid-2">
           <view class="form-group">
-            <text class="form-label">翼缘宽 b_f</text>
+            <text class="form-label">翼缘宽 b𝒻</text>
             <input class="form-input" v-model.number="form.b_f_ibeam" type="digit" placeholder="mm" />
           </view>
           <view class="form-group">
@@ -180,11 +180,11 @@
         </view>
         <view class="grid-2">
           <view class="form-group">
-            <text class="form-label">翼缘厚 t_f</text>
+            <text class="form-label">翼缘厚 t𝒻</text>
             <input class="form-input" v-model.number="form.t_f" type="digit" placeholder="mm" />
           </view>
           <view class="form-group">
-            <text class="form-label">腹板厚 t_w</text>
+            <text class="form-label">腹板厚 tw</text>
             <input class="form-input" v-model.number="form.t_w" type="digit" placeholder="mm" />
           </view>
         </view>
@@ -199,7 +199,7 @@
     <!-- 计算结果 -->
     <view class="card" v-if="result">
       <view class="calc-hero">
-        <text class="calc-hero-label">惯性矩 I_x</text>
+        <text class="calc-hero-label">惯性矩 Iₓ</text>
         <text class="calc-hero-value">{{ formatSci(result.data.I_x) }}<text class="calc-hero-unit"> mm⁴</text></text>
         <text class="calc-hero-sub">{{ formatSci(result.data.I_x / 1e4) }} cm⁴</text>
         <text class="status-tag status-ok">计算完成</text>
@@ -212,47 +212,47 @@
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">惯性矩 I_x</text>
+          <text class="calc-key">惯性矩 Iₓ</text>
           <text class="calc-val">{{ formatSci(result.data.I_x) }} mm⁴  =  {{ formatSci(result.data.I_x / 1e4) }} cm⁴</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">惯性矩 I_y</text>
+          <text class="calc-key">惯性矩 Iᵧ</text>
           <text class="calc-val">{{ formatSci(result.data.I_y) }} mm⁴  =  {{ formatSci(result.data.I_y / 1e4) }} cm⁴</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">抵抗矩 W_x</text>
+          <text class="calc-key">抵抗矩 Wₓ</text>
           <text class="calc-val">{{ formatSci(result.data.W_x) }} mm³</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">抵抗矩 W_y</text>
+          <text class="calc-key">抵抗矩 Wᵧ</text>
           <text class="calc-val">{{ formatSci(result.data.W_y) }} mm³</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">回转半径 i_x</text>
+          <text class="calc-key">回转半径 iₓ</text>
           <text class="calc-val">{{ result.data.i_x }} mm</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">回转半径 i_y</text>
+          <text class="calc-key">回转半径 iᵧ</text>
           <text class="calc-val">{{ result.data.i_y }} mm</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">面积矩 S_x</text>
+          <text class="calc-key">面积矩 Sₓ</text>
           <text class="calc-val">{{ formatSci(result.data.S_x) }} mm³</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">形心距底边 y_c</text>
+          <text class="calc-key">形心距底边 y꜀</text>
           <text class="calc-val">{{ result.data.y_c }} mm</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">极惯性矩 I_p</text>
+          <text class="calc-key">极惯性矩 Iₚ</text>
           <text class="calc-val">{{ formatSci(result.data.I_p) }} mm⁴  =  {{ formatSci(result.data.I_p / 1e4) }} cm⁴</text>
         </view>
       </view>
@@ -548,7 +548,7 @@ export default {
 .highlight-input {
   font-size: 36rpx;
   font-weight: 700;
-  color: #2C6FCE;
+  color: #14575B;
   text-align: center;
 }
 
@@ -606,9 +606,11 @@ export default {
 
 .calc-val {
   flex: 1;
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #111;
-  line-height: 1.5;
+  line-height: 1.75;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: .3rpx;
 }
 
 .calc-hr {

@@ -37,5 +37,12 @@
     "uniStatistics": {
         "enable": false
     },
+    "h5": {
+        "title": "土木工程计算工具箱",
+        "router": {
+            "mode": "hash",
+            "base": "/engineering-calc/"
+        }
+    },
     "vueVersion": "3"
 }

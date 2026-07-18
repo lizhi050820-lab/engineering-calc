@@ -339,6 +339,14 @@ def calculate_soil_three_phase(inp: SoilThreePhaseInput) -> SoilThreePhaseResult
     # 执行求解
     final, derivations = _solve(known, inp.gamma_w, inp.g)
 
+    # 推导结果同样必须满足基本物理范围，不能只校验用户直接输入的值。
+    if final.get("Sr") is not None and not 0 <= final["Sr"] <= 1:
+        raise ValueError(f"推导得到的饱和度 S_r={final['Sr']:.4f} 超出 0~1，请检查已知参数是否相容")
+    if final.get("n") is not None and not 0 < final["n"] < 1:
+        raise ValueError(f"推导得到的孔隙率 n={final['n']:.4f} 超出 0~1，请检查已知参数是否相容")
+    if final.get("e") is not None and final["e"] < 0:
+        raise ValueError(f"推导得到的孔隙比 e={final['e']:.4f} 小于 0，请检查已知参数是否相容")
+
     # 识别缺失指标
     all_syms = ["Gs", "w", "gamma", "gamma_d", "gamma_sat", "gamma_prime",
                 "e", "n", "Sr", "rho", "rho_d", "rho_sat"]

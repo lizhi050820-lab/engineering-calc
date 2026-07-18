@@ -15,7 +15,7 @@ export default {
 <style>
 /* 全局样式 */
 page {
-  background-color: #F5F6FA;
+  background-color: #EEF1EF;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 28rpx;
   color: #333;
@@ -23,10 +23,10 @@ page {
 
 /* 通用按钮 */
 .btn-primary {
-  background: linear-gradient(135deg, #2C6FCE, #5B9CF5);
+  background: #E8734A;
   color: #fff;
   border: none;
-  border-radius: 12rpx;
+  border-radius: 18rpx;
   padding: 24rpx 0;
   font-size: 32rpx;
   font-weight: 600;
@@ -35,14 +35,15 @@ page {
 }
 
 .btn-primary:active {
-  opacity: 0.85;
+  opacity: 0.9;
+  transform: scale(0.985);
 }
 
 .btn-secondary {
   background: #fff;
-  color: #2C6FCE;
-  border: 2rpx solid #2C6FCE;
-  border-radius: 12rpx;
+  color: #14575B;
+  border: 2rpx solid #14575B;
+  border-radius: 18rpx;
   padding: 24rpx 0;
   font-size: 32rpx;
   text-align: center;
@@ -51,11 +52,12 @@ page {
 
 /* 通用卡片 */
 .card {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
+  background: #FAF8F3;
+  border-radius: 22rpx;
+  padding: 32rpx;
   margin: 20rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8rpx 26rpx rgba(18, 63, 67, 0.07);
+  border: 1rpx solid rgba(18, 63, 67, 0.06);
 }
 
 /* 表单组 */
@@ -66,7 +68,7 @@ page {
 .form-label {
   display: block;
   font-size: 28rpx;
-  color: #666;
+  color: #385759;
   margin-bottom: 12rpx;
   font-weight: 500;
 }
@@ -74,8 +76,8 @@ page {
 .form-input {
   width: 100%;
   height: 80rpx;
-  background: #F5F6FA;
-  border-radius: 12rpx;
+  background: #F0EFEB;
+  border-radius: 15rpx;
   padding: 0 24rpx;
   font-size: 30rpx;
   box-sizing: border-box;
@@ -88,8 +90,8 @@ page {
   justify-content: space-between;
   width: 100%;
   height: 80rpx;
-  background: #F5F6FA;
-  border-radius: 12rpx;
+  background: #F0EFEB;
+  border-radius: 15rpx;
   padding: 0 24rpx;
   font-size: 30rpx;
   box-sizing: border-box;
@@ -121,13 +123,13 @@ page {
 }
 
 .status-ok {
-  background: #E8F5E9;
-  color: #2E7D32;
+  background: #D9F0E4;
+  color: #26734C;
 }
 
 .status-warn {
-  background: #FFF3E0;
-  color: #E65100;
+  background: #FBE8DF;
+  color: #B95836;
 }
 
 .status-error {
@@ -150,7 +152,7 @@ page {
   display: block;
   font-size: 56rpx;
   font-weight: 800;
-  color: #111;
+  color: #123F43;
   margin-bottom: 12rpx;
 }
 .calc-hero-unit {
@@ -171,14 +173,16 @@ page {
   width: 170rpx;
   flex-shrink: 0;
   font-size: 26rpx;
-  color: #333;
+  color: #385759;
   font-weight: 500;
 }
 .calc-val {
   flex: 1;
-  font-size: 26rpx;
-  color: #111;
-  line-height: 1.5;
+  font-size: 28rpx;
+  color: #17383A;
+  line-height: 1.75;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.3rpx;
 }
 .calc-hr {
   height: 1rpx;

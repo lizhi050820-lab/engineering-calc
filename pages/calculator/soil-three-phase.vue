@@ -7,7 +7,7 @@
 
       <view class="grid-2">
         <view class="form-group">
-          <text class="form-label">土粒比重 G_s</text>
+          <text class="form-label">土粒比重 Gₛ</text>
           <input class="form-input" v-model="form.Gs" type="digit" placeholder="必填，如 2.70" />
         </view>
         <view class="form-group">
@@ -22,14 +22,14 @@
           <input class="form-input" v-model="form.gamma" type="digit" placeholder="如 18.5" />
         </view>
         <view class="form-group">
-          <text class="form-label">干重度 γ_d (kN/m³)</text>
+          <text class="form-label">干重度 γd (kN/m³)</text>
           <input class="form-input" v-model="form.gamma_d" type="digit" placeholder="如 16.1" />
         </view>
       </view>
 
       <view class="grid-2">
         <view class="form-group">
-          <text class="form-label">饱和重度 γ_sat (kN/m³)</text>
+          <text class="form-label">饱和重度 γₛₐₜ (kN/m³)</text>
           <input class="form-input" v-model="form.gamma_sat" type="digit" placeholder="如 20.5" />
         </view>
         <view class="form-group">
@@ -51,7 +51,7 @@
 
       <view class="grid-2">
         <view class="form-group">
-          <text class="form-label">饱和度 S_r</text>
+          <text class="form-label">饱和度 Sᵣ</text>
           <input class="form-input" v-model="form.Sr" type="digit" placeholder="如 0.62（1.0=饱和）" />
         </view>
         <view class="form-group">
@@ -62,17 +62,17 @@
 
       <view class="grid-2">
         <view class="form-group">
-          <text class="form-label">干密度 ρ_d (g/cm³)</text>
+          <text class="form-label">干密度 ρd (g/cm³)</text>
           <input class="form-input" v-model="form.rho_d" type="digit" placeholder="如 1.64" />
         </view>
         <view class="form-group">
-          <text class="form-label">水的重度 γ_w (kN/m³)</text>
+          <text class="form-label">水的重度 γw (kN/m³)</text>
           <input class="form-input" v-model="form.gamma_w" type="digit" placeholder="默认 9.81，考试常用 10" />
         </view>
       </view>
 
       <view class="preset-hint">
-        <text>常见 G_s 参考：砂土 2.65~2.69 ｜ 粉土 2.70~2.71 ｜ 黏土 2.72~2.75</text>
+        <text>常见 Gₛ 参考：砂土 2.65~2.69 ｜ 粉土 2.70~2.71 ｜ 黏土 2.72~2.75</text>
       </view>
     </view>
 
@@ -92,7 +92,7 @@
       <!-- 三相草图式汇总 -->
       <view class="result-grid" v-if="result.data">
         <view class="rg-item rg-main">
-          <text class="rg-label">土粒比重 G_s</text>
+          <text class="rg-label">土粒比重 Gₛ</text>
           <text class="rg-val">{{ fmt(result.data.Gs) }}</text>
         </view>
         <view class="rg-item">
@@ -108,7 +108,7 @@
           <text class="rg-val">{{ fmtPct(result.data.n) }}</text>
         </view>
         <view class="rg-item">
-          <text class="rg-label">饱和度 S_r</text>
+          <text class="rg-label">饱和度 Sᵣ</text>
           <text class="rg-val">{{ fmtPct(result.data.Sr) }}</text>
         </view>
         <view class="rg-item rg-main">
@@ -116,11 +116,11 @@
           <text class="rg-val">{{ fmt(result.data.gamma) }} kN/m³</text>
         </view>
         <view class="rg-item">
-          <text class="rg-label">干重度 γ_d</text>
+          <text class="rg-label">干重度 γd</text>
           <text class="rg-val">{{ fmt(result.data.gamma_d) }} kN/m³</text>
         </view>
         <view class="rg-item">
-          <text class="rg-label">饱和重度 γ_sat</text>
+          <text class="rg-label">饱和重度 γₛₐₜ</text>
           <text class="rg-val">{{ fmt(result.data.gamma_sat) }} kN/m³</text>
         </view>
         <view class="rg-item">
@@ -132,19 +132,19 @@
           <text class="rg-val">{{ fmt(result.data.rho) }} g/cm³</text>
         </view>
         <view class="rg-item">
-          <text class="rg-label">干密度 ρ_d</text>
+          <text class="rg-label">干密度 ρd</text>
           <text class="rg-val">{{ fmt(result.data.rho_d) }} g/cm³</text>
         </view>
         <view class="rg-item">
-          <text class="rg-label">饱和密度 ρ_sat</text>
+          <text class="rg-label">饱和密度 ρₛₐₜ</text>
           <text class="rg-val">{{ fmt(result.data.rho_sat) }} g/cm³</text>
         </view>
       </view>
 
       <!-- γ_w 作用说明 -->
       <view class="gamma-note" v-if="result.data">
-        <text class="gamma-note-title">💡 为什么需要 γ_w？</text>
-        <text class="gamma-note-text">土粒比重 G_s 是一个<text class="hl">比值</text>（G_s = γ_s / γ_w），本身没有单位。要将无量纲的 G_s 换算成实际重度（kN/m³），必须借助 γ_w 作为"桥梁"。公式中的 γ_d、γ_sat、γ′ 都直接含有 γ_w，所以改变 γ_w（如考试取 10、实际取 9.81）会影响这些结果。</text>
+        <text class="gamma-note-title">为什么需要 γw？</text>
+        <text class="gamma-note-text">土粒比重 Gₛ 是一个<text class="hl">比值</text>（Gₛ = γₛ / γw），本身没有单位。要将无量纲的 Gₛ 换算成实际重度（kN/m³），必须借助 γw 作为“桥梁”。公式中的 γd、γₛₐₜ、γ′ 都直接含有 γw，所以改变 γw（如考试取 10、实际取 9.81）会影响这些结果。</text>
       </view>
 
       <!-- 推导过程 -->
@@ -157,7 +157,7 @@
           <view class="deriv-content">
             <text class="deriv-symbol">{{ d.symbol }}</text>
             <text class="deriv-eq">= {{ fmt(d.value) }} <text class="deriv-unit">{{ d.unit }}</text></text>
-            <text class="deriv-formula">{{ d.formula }}</text>
+            <rich-text class="deriv-formula" :nodes="formulaHtml(d.formula)"></rich-text>
           </view>
         </view>
       </view>
@@ -175,7 +175,7 @@
       <view class="ref-section">
         <view class="ref-subtitle">一、三相草图法</view>
         <view class="ref-text">
-          令土粒体积 <text class="hl">V_s = 1</text>，则孔隙体积 V_v = e，总体积 V = 1+e。在三相草图上标注各相质量和体积，即可推导全部公式。
+          令土粒体积 <text class="hl">Vₛ = 1</text>，则孔隙体积 Vᵥ = e，总体积 V = 1 + e。在三相草图上标注各相质量和体积，即可推导全部公式。
         </view>
       </view>
 
@@ -184,27 +184,27 @@
         <view class="formula-list">
           <view class="formula-row">
             <text class="formula-sym">孔隙比</text>
-            <text class="formula-eq">e = V_v / V_s</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('e = V_v / V_s')"></rich-text>
             <text class="formula-desc">孔隙体积与土粒体积之比</text>
           </view>
           <view class="formula-row">
             <text class="formula-sym">孔隙率</text>
-            <text class="formula-eq">n = V_v / V × 100%</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('n = V_v / V × 100%')"></rich-text>
             <text class="formula-desc">孔隙体积与总体积之比</text>
           </view>
           <view class="formula-row">
             <text class="formula-sym">含水量</text>
-            <text class="formula-eq">w = m_w / m_s × 100%</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('w = m_w / m_s × 100%')"></rich-text>
             <text class="formula-desc">水的质量与土粒质量之比</text>
           </view>
           <view class="formula-row">
             <text class="formula-sym">饱和度</text>
-            <text class="formula-eq">S_r = V_w / V_v × 100%</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('S_r = V_w / V_v × 100%')"></rich-text>
             <text class="formula-desc">水的体积与孔隙体积之比</text>
           </view>
           <view class="formula-row">
             <text class="formula-sym">土粒比重</text>
-            <text class="formula-eq">G_s = ρ_s / ρ_w = γ_s / γ_w</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('G_s = ρ_s / ρ_w = γ_s / γ_w')"></rich-text>
             <text class="formula-desc">土粒密度与水密度之比</text>
           </view>
         </view>
@@ -215,19 +215,19 @@
         <view class="formula-list">
           <view class="formula-row">
             <text class="formula-sym">干重度</text>
-            <text class="formula-eq">γ_d = γ / (1 + w) = G_s·γ_w / (1 + e)</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('γ_d = γ / (1 + w) = G_s · γ_w / (1 + e)')"></rich-text>
           </view>
           <view class="formula-row">
             <text class="formula-sym">天然重度</text>
-            <text class="formula-eq">γ = G_s·γ_w·(1 + w) / (1 + e)</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('γ = G_s · γ_w · (1 + w) / (1 + e)')"></rich-text>
           </view>
           <view class="formula-row">
             <text class="formula-sym">饱和重度</text>
-            <text class="formula-eq">γ_sat = (G_s + e)·γ_w / (1 + e)</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('γ_sat = (G_s + e) · γ_w / (1 + e)')"></rich-text>
           </view>
           <view class="formula-row">
             <text class="formula-sym">有效重度</text>
-            <text class="formula-eq">γ′ = γ_sat − γ_w = (G_s − 1)·γ_w / (1 + e)</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('γ′ = γ_sat − γ_w = (G_s − 1) · γ_w / (1 + e)')"></rich-text>
           </view>
         </view>
       </view>
@@ -237,15 +237,15 @@
         <view class="formula-list">
           <view class="formula-row">
             <text class="formula-sym">n ↔ e</text>
-            <text class="formula-eq">n = e/(1+e)，e = n/(1−n)</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('n = e / (1 + e)，e = n / (1 − n)')"></rich-text>
           </view>
           <view class="formula-row">
-            <text class="formula-sym">S_r 关联式</text>
-            <text class="formula-eq">S_r·e = w·G_s（核心等式）</text>
+            <text class="formula-sym">Sᵣ 关联式</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('S_r · e = w · G_s（核心等式）')"></rich-text>
           </view>
           <view class="formula-row">
             <text class="formula-sym">饱和时</text>
-            <text class="formula-eq">S_r = 1 → e = w·G_s</text>
+            <rich-text class="formula-eq" :nodes="formulaHtml('S_r = 1 → e = w · G_s')"></rich-text>
           </view>
         </view>
       </view>
@@ -253,7 +253,7 @@
       <view class="ref-section">
         <view class="ref-subtitle">五、重度大小关系</view>
         <view class="ref-text ref-order">
-          <text class="hl">γ_sat > γ > γ_d > γ′</text>
+          <text class="hl">γₛₐₜ ＞ γ ＞ γd ＞ γ′</text>
         </view>
         <view class="ref-text">即：饱和重度 > 天然重度 > 干重度 > 有效重度</view>
       </view>
@@ -267,18 +267,18 @@
             <text class="sym-col sym-col-unit">单位</text>
             <text class="sym-col sym-col-def">定义</text>
           </view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">G_s</text><text class="sym-col sym-col-name">土粒比重</text><text class="sym-col sym-col-unit">—</text><text class="sym-col sym-col-def">ρ_s/ρ_w</text></view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">w</text><text class="sym-col sym-col-name">含水量</text><text class="sym-col sym-col-unit">%</text><text class="sym-col sym-col-def">m_w/m_s</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">Gₛ</text><text class="sym-col sym-col-name">土粒比重</text><text class="sym-col sym-col-unit">—</text><text class="sym-col sym-col-def">ρₛ / ρw</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">w</text><text class="sym-col sym-col-name">含水量</text><text class="sym-col sym-col-unit">%</text><text class="sym-col sym-col-def">mᵥ / mₛ</text></view>
           <view class="sym-row"><text class="sym-col sym-col-sym">γ</text><text class="sym-col sym-col-name">天然重度</text><text class="sym-col sym-col-unit">kN/m³</text><text class="sym-col sym-col-def">W/V</text></view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">γ_d</text><text class="sym-col sym-col-name">干重度</text><text class="sym-col sym-col-unit">kN/m³</text><text class="sym-col sym-col-def">W_s/V</text></view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">γ_sat</text><text class="sym-col sym-col-name">饱和重度</text><text class="sym-col sym-col-unit">kN/m³</text><text class="sym-col sym-col-def">孔隙全充满水</text></view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">γ′</text><text class="sym-col sym-col-name">有效重度</text><text class="sym-col sym-col-unit">kN/m³</text><text class="sym-col sym-col-def">γ_sat−γ_w</text></view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">e</text><text class="sym-col sym-col-name">孔隙比</text><text class="sym-col sym-col-unit">—</text><text class="sym-col sym-col-def">V_v/V_s</text></view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">n</text><text class="sym-col sym-col-name">孔隙率</text><text class="sym-col sym-col-unit">%</text><text class="sym-col sym-col-def">V_v/V</text></view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">S_r</text><text class="sym-col sym-col-name">饱和度</text><text class="sym-col sym-col-unit">%</text><text class="sym-col sym-col-def">V_w/V_v</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">γd</text><text class="sym-col sym-col-name">干重度</text><text class="sym-col sym-col-unit">kN/m³</text><text class="sym-col sym-col-def">Wₛ / V</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">γₛₐₜ</text><text class="sym-col sym-col-name">饱和重度</text><text class="sym-col sym-col-unit">kN/m³</text><text class="sym-col sym-col-def">孔隙全充满水</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">γ′</text><text class="sym-col sym-col-name">有效重度</text><text class="sym-col sym-col-unit">kN/m³</text><text class="sym-col sym-col-def">γₛₐₜ − γw</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">e</text><text class="sym-col sym-col-name">孔隙比</text><text class="sym-col sym-col-unit">—</text><text class="sym-col sym-col-def">Vᵥ / Vₛ</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">n</text><text class="sym-col sym-col-name">孔隙率</text><text class="sym-col sym-col-unit">%</text><text class="sym-col sym-col-def">Vᵥ / V</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">Sᵣ</text><text class="sym-col sym-col-name">饱和度</text><text class="sym-col sym-col-unit">%</text><text class="sym-col sym-col-def">Vw / Vᵥ</text></view>
           <view class="sym-row"><text class="sym-col sym-col-sym">ρ</text><text class="sym-col sym-col-name">天然密度</text><text class="sym-col sym-col-unit">g/cm³</text><text class="sym-col sym-col-def">m/V</text></view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">ρ_d</text><text class="sym-col sym-col-name">干密度</text><text class="sym-col sym-col-unit">g/cm³</text><text class="sym-col sym-col-def">m_s/V</text></view>
-          <view class="sym-row"><text class="sym-col sym-col-sym">γ_w</text><text class="sym-col sym-col-name">水的重度</text><text class="sym-col sym-col-unit">kN/m³</text><text class="sym-col sym-col-def">≈9.81（或10）</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">ρd</text><text class="sym-col sym-col-name">干密度</text><text class="sym-col sym-col-unit">g/cm³</text><text class="sym-col sym-col-def">mₛ / V</text></view>
+          <view class="sym-row"><text class="sym-col sym-col-sym">γw</text><text class="sym-col sym-col-name">水的重度</text><text class="sym-col sym-col-unit">kN/m³</text><text class="sym-col sym-col-def">≈ 9.81（或 10）</text></view>
         </view>
       </view>
     </view>
@@ -306,6 +306,11 @@ export default {
   },
 
   methods: {
+    formulaHtml(value) {
+      if (value === null || value === undefined) return ''
+      const safe = String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return safe.replace(/([A-Za-z\u0370-\u03FF]+)_([A-Za-z0-9]+)/g, '$1<sub style="font-size:70%;line-height:0;vertical-align:sub;">$2</sub>')
+    },
     async doCalculate() {
       if (!this.form.Gs && !this.form.w && !this.form.gamma && !this.form.gamma_d
         && !this.form.e && !this.form.n && !this.form.Sr && !this.form.rho && !this.form.rho_d) {
@@ -313,7 +318,7 @@ export default {
         return
       }
       if (!this.form.Gs) {
-        uni.showToast({ title: '土粒比重 G_s 为必填项', icon: 'none' })
+        uni.showToast({ title: '土粒比重 Gₛ 为必填项', icon: 'none' })
         return
       }
 
@@ -415,7 +420,7 @@ export default {
 }
 
 .rg-main .rg-val {
-  color: #2C6FCE;
+  color: #14575B;
   font-size: 30rpx;
 }
 
@@ -425,14 +430,14 @@ export default {
   padding: 20rpx;
   background: #F0F4FF;
   border-radius: 12rpx;
-  border-left: 4rpx solid #2C6FCE;
+  border-left: 4rpx solid #14575B;
 }
 
 .gamma-note-title {
   display: block;
   font-size: 26rpx;
   font-weight: 600;
-  color: #2C6FCE;
+  color: #14575B;
   margin-bottom: 8rpx;
 }
 
@@ -471,7 +476,7 @@ export default {
   font-size: 22rpx;
   font-weight: 700;
   color: #fff;
-  background: #2C6FCE;
+  background: #14575B;
   border-radius: 50%;
   flex-shrink: 0;
   margin-right: 16rpx;
@@ -493,7 +498,7 @@ export default {
 .deriv-eq {
   font-size: 28rpx;
   font-weight: 700;
-  color: #2C6FCE;
+  color: #14575B;
   margin: 4rpx 0;
 }
 
@@ -504,9 +509,10 @@ export default {
 }
 
 .deriv-formula {
-  font-size: 22rpx;
-  color: #888;
-  line-height: 1.5;
+  display:block;font-size: 25rpx;color: #526B6C;line-height: 1.75;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing:.4rpx;
 }
 
 .missing-note {
@@ -532,29 +538,32 @@ export default {
 .ref-subtitle {
   font-size: 28rpx; font-weight: 600; color: #333;
   margin-bottom: 12rpx;
-  padding-left: 12rpx; border-left: 4rpx solid #2C6FCE;
+  padding-left: 12rpx; border-left: 4rpx solid #14575B;
 }
 .ref-text { font-size: 24rpx; color: #555; line-height: 1.7; }
 .ref-order { text-align: center; padding: 12rpx; background: #F0F4FF; border-radius: 8rpx; margin: 8rpx 0; }
 
-.hl { color: #2C6FCE; font-weight: 600; }
+.hl { color: #14575B; font-weight: 600; }
 
 .formula-list { margin-top: 8rpx; }
 .formula-row {
-  display: flex; align-items: baseline;
-  padding: 12rpx 0; border-bottom: 1rpx solid #f8f8f8;
-  flex-wrap: wrap;
+  display: flex; align-items: flex-start;
+  padding: 18rpx 0; border-bottom: 1rpx solid #E5E7E3;
+  flex-wrap: wrap; row-gap:8rpx;
 }
 .formula-sym {
-  width: 80rpx; flex-shrink: 0;
-  font-size: 24rpx; font-weight: 600; color: #333;
+  width: 112rpx; flex-shrink: 0;
+  font-size: 24rpx; font-weight: 650; color: #263F40;
 }
 .formula-eq {
-  width: 380rpx; flex-shrink: 0;
-  font-size: 24rpx; color: #2C6FCE; font-family: monospace;
+  flex:1;min-width:420rpx;
+  font-size: 29rpx;color:#14575B;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height:1.65;letter-spacing:.5rpx;
 }
 .formula-desc {
-  font-size: 22rpx; color: #999; margin-left: 8rpx;
+  width:100%;font-size: 22rpx;color:#8A9694;margin-left:112rpx;line-height:1.55;
 }
 
 /* ========== 符号表 ========== */

@@ -27,6 +27,50 @@ from calculators.section_properties import (
     calculate_section_properties,
     SectionPropertiesInput,
 )
+from calculators.bolt_connection import BoltConnectionInput, calculate_bolt_connection
+from calculators.darcy_law import DarcyLawInput, calculate_darcy_law
+from calculators.composite_section import CompositeBlock, calculate_composite_section
+from calculators.soil_three_phase import SoilThreePhaseInput, calculate_soil_three_phase
+from calculators.beam_internal_forces import BeamForceInput, BeamLoadInput, calculate_beam_forces
+
+
+class TestBoltConnection:
+    """钢结构螺栓连接承载力测试。"""
+
+    def test_ordinary_bolt(self):
+        r = calculate_bolt_connection(BoltConnectionInput(
+            bolt_type='ordinary', diameter=20, bolt_count=4,
+            shear_planes=1, bolt_grade='4.6', steel_grade='Q235',
+            connected_thickness=10, load=150,
+        ))
+        assert abs(r['details']['shear_capacity'] - 43.982) < 0.01
+        assert abs(r['details']['bearing_capacity'] - 61.000) < 0.01
+        assert r['control'] == '抗剪承载力'
+        assert r['passed'] is True
+        print(f"  [PASS] 普通螺栓: capacity={r['total_capacity']:.3f} kN")
+
+    def test_high_strength_bolt(self):
+        r = calculate_bolt_connection(BoltConnectionInput(
+            bolt_type='high_strength', diameter=20, bolt_count=4,
+            bolt_grade='8.8', slip_coefficient=0.45,
+            friction_surfaces=1, hole_type='standard', load=300,
+        ))
+        assert r['details']['pretension'] == 125.0
+        assert abs(r['per_bolt_capacity'] - 50.625) < 0.01
+        assert r['passed'] is False
+        print(f"  [PASS] 高强螺栓: capacity={r['total_capacity']:.3f} kN")
+
+    def test_bolt_api(self):
+        from main import app
+        from fastapi.testclient import TestClient
+        resp = TestClient(app).post('/api/calculate/bolt-connection', json={
+            'bolt_type': 'ordinary', 'diameter': 20, 'bolt_count': 4,
+            'shear_planes': 1, 'bolt_grade': '4.6', 'steel_grade': 'Q235',
+            'connected_thickness': 10,
+        })
+        assert resp.status_code == 200
+        assert resp.json()['data']['total_capacity'] > 0
+        print("  [PASS] 螺栓连接 API")
 
 
 # =============================================================================
@@ -711,6 +755,259 @@ class TestSectionProperties:
 # 运行所有测试
 # =============================================================================
 
+class TestBeamInternalForces:
+    """结构力学常见梁内力速算测试。"""
+
+    def test_simply_supported_point_load(self):
+        r = calculate_beam_forces(BeamForceInput(
+            beam_type='simply_supported', load_type='point',
+            L=6, P=30, a=2,
+        ))
+        assert abs(r.RA - 20.0) < 0.001
+        assert abs(r.RB - 10.0) < 0.001
+        assert abs(r.Mmax - 40.0) < 0.001
+        assert abs(r.x_Mmax - 2.0) < 0.001
+        print(f"  [PASS] 简支梁任意集中力: RA={r.RA:.3f}, RB={r.RB:.3f}, Mmax={r.Mmax:.3f}")
+
+    def test_simply_supported_uniform_load(self):
+        r = calculate_beam_forces(BeamForceInput(
+            beam_type='simply_supported', load_type='uniform',
+            L=8, q=12,
+        ))
+        assert abs(r.RA - 48.0) < 0.001
+        assert abs(r.RB - 48.0) < 0.001
+        assert abs(r.Mmax - 96.0) < 0.001
+        assert abs(r.x_Mmax - 4.0) < 0.001
+        print(f"  [PASS] 简支梁均布荷载: Mmax={r.Mmax:.3f}")
+
+    def test_cantilever_end_point(self):
+        r = calculate_beam_forces(BeamForceInput(
+            beam_type='cantilever', load_type='end_point',
+            L=3, P=10,
+        ))
+        assert abs(r.RA - 10.0) < 0.001
+        assert abs(r.fixed_moment - 30.0) < 0.001
+        assert abs(r.Mmax - 30.0) < 0.001
+        print(f"  [PASS] 悬臂梁端部集中力: MA={r.fixed_moment:.3f}")
+
+    def test_overhanging_end_point(self):
+        r = calculate_beam_forces(BeamForceInput(
+            beam_type='overhanging', load_type='overhang_end_point',
+            L=5, c=1, P=20,
+        ))
+        assert abs(r.RA + 4.0) < 0.001
+        assert abs(r.RB - 24.0) < 0.001
+        assert abs(r.Mmax - 20.0) < 0.001
+        print(f"  [PASS] 外伸梁端部集中力: RA={r.RA:.3f}, RB={r.RB:.3f}")
+
+    def test_beam_forces_api(self):
+        from main import app
+        from fastapi.testclient import TestClient
+        resp = TestClient(app).post('/api/calculate/beam-forces', json={
+            'beam_type': 'simply_supported',
+            'load_type': 'mid_point',
+            'L': 6,
+            'P': 40,
+        })
+        assert resp.status_code == 200
+        data = resp.json()['data']
+        assert abs(data['Mmax'] - 60.0) < 0.001
+        print("  [PASS] 梁内力速算 API")
+
+    def test_combined_loads_with_partial_udl_and_moment(self):
+        """集中力、局部均布荷载和集中弯矩应能同时叠加。"""
+        r = calculate_beam_forces(BeamForceInput(
+            beam_type='simply_supported', load_type='combined', L=10,
+            loads=[
+                BeamLoadInput(type='point', value=20, x=2),
+                BeamLoadInput(type='udl', value=10, x1=4, x2=8),
+                BeamLoadInput(type='moment', value=30, x=6, direction='clockwise'),
+            ],
+        ))
+        assert abs(r.RA - 29.0) < 0.001
+        assert abs(r.RB - 31.0) < 0.001
+        assert abs(r.Mmax - 104.0) < 0.001
+        assert abs(r.x_Mmax - 6.0) < 0.001
+        assert r.key_values['load_count'] == 3
+        print("  [PASS] 简支梁组合荷载: 集中力 + 局部均布荷载 + 集中弯矩")
+
+    def test_cantilever_load_positions_are_adjustable(self):
+        """悬臂梁荷载不应被限制在自由端或满跨。"""
+        r = calculate_beam_forces(BeamForceInput(
+            beam_type='cantilever', load_type='combined', L=6,
+            loads=[
+                BeamLoadInput(type='point', value=10, x=3),
+                BeamLoadInput(type='udl', value=4, x1=1, x2=5),
+                BeamLoadInput(type='moment', value=12, x=4, direction='counterclockwise'),
+            ],
+        ))
+        assert abs(r.RA - 26.0) < 0.001
+        assert abs(r.fixed_moment - 66.0) < 0.001
+        assert abs(r.Mmax - 66.0) < 0.001
+        assert abs(r.M_negative + 66.0) < 0.001
+        print("  [PASS] 悬臂梁任意位置荷载与局部均布荷载")
+
+    def test_overhanging_beam_combined_reactions(self):
+        r = calculate_beam_forces(BeamForceInput(
+            beam_type='overhanging', load_type='combined', L=5, c=2,
+            loads=[
+                BeamLoadInput(type='udl', value=6, x1=0, x2=3),
+                BeamLoadInput(type='point', value=12, x=6.5),
+            ],
+        ))
+        # ΣF=30；ΣMA=18×1.5+12×6.5=105，因此 RB=21、RA=9。
+        assert abs(r.RA - 9.0) < 0.001
+        assert abs(r.RB - 21.0) < 0.001
+        assert r.M_negative < 0
+        print("  [PASS] 外伸梁主跨与外伸段组合荷载")
+
+    def test_invalid_partial_udl_range(self):
+        try:
+            calculate_beam_forces(BeamForceInput(
+                beam_type='simply_supported', load_type='combined', L=6,
+                loads=[BeamLoadInput(type='udl', value=10, x1=5, x2=3)],
+            ))
+            assert False, "x2 <= x1 应拒绝"
+        except ValueError as e:
+            assert "x₁ < x₂" in str(e)
+            print("  [PASS] 局部均布荷载范围校验")
+
+    def test_combined_loads_api(self):
+        from main import app
+        from fastapi.testclient import TestClient
+        resp = TestClient(app).post('/api/calculate/beam-forces', json={
+            'beam_type': 'simply_supported', 'L': 10,
+            'loads': [
+                {'type': 'point', 'value': 20, 'x': 2},
+                {'type': 'udl', 'value': 10, 'x1': 4, 'x2': 8},
+                {'type': 'moment', 'value': 30, 'x': 6, 'direction': 'clockwise'},
+            ],
+        })
+        assert resp.status_code == 200
+        data = resp.json()['data']
+        assert abs(data['RA'] - 29.0) < 0.001
+        assert abs(data['Mmax'] - 104.0) < 0.001
+        assert data['M_positive'] == 104.0
+        print("  [PASS] 梁组合荷载 API")
+
+    def test_double_overhanging_support_positions(self):
+        """两支座可位于梁内，形成对称双外伸梁。"""
+        r = calculate_beam_forces(BeamForceInput(
+            beam_type='simply_supported', load_type='combined', L=10,
+            support_a=2, support_b=8,
+            loads=[BeamLoadInput(type='udl', value=5, x1=0, x2=10)],
+        ))
+        assert abs(r.RA - 25.0) < 0.001
+        assert abs(r.RB - 25.0) < 0.001
+        assert abs(r.M_positive - 12.5) < 0.001
+        assert abs(r.M_negative + 10.0) < 0.001
+        assert r.key_values['support_a'] == 2.0
+        assert r.key_values['support_b'] == 8.0
+        print("  [PASS] 双外伸梁可调支座: RA=RB=25.000 kN")
+
+    def test_right_fixed_cantilever(self):
+        """右端固定时，固定端反力矩应保留方向符号。"""
+        r = calculate_beam_forces(BeamForceInput(
+            beam_type='cantilever', load_type='combined', L=6,
+            fixed_end='right',
+            loads=[BeamLoadInput(type='point', value=10, x=2)],
+        ))
+        assert abs(r.RA - 10.0) < 0.001
+        assert abs(r.fixed_moment + 40.0) < 0.001
+        assert abs(r.Mmax - 40.0) < 0.001
+        assert abs(r.x_Mmax - 6.0) < 0.001
+        assert r.key_values['fixed_end'] == 'right'
+        print("  [PASS] 右端固定悬臂梁: MF=-40.000 kN·m")
+
+    def test_invalid_support_positions(self):
+        try:
+            calculate_beam_forces(BeamForceInput(
+                beam_type='simply_supported', load_type='combined', L=8,
+                support_a=6, support_b=4,
+                loads=[BeamLoadInput(type='point', value=10, x=3)],
+            ))
+            assert False, "xA >= xB 应拒绝"
+        except ValueError as e:
+            assert "xA < xB" in str(e)
+            print("  [PASS] 支座位置顺序校验")
+
+    def test_support_positions_api(self):
+        from main import app
+        from fastapi.testclient import TestClient
+        resp = TestClient(app).post('/api/calculate/beam-forces', json={
+            'beam_type': 'simply_supported', 'L': 10,
+            'support_a': 2, 'support_b': 8,
+            'loads': [{'type': 'udl', 'value': 5, 'x1': 0, 'x2': 10}],
+        })
+        assert resp.status_code == 200
+        data = resp.json()['data']
+        assert data['RA'] == 25.0 and data['RB'] == 25.0
+        assert data['key_values']['support_a'] == 2.0
+        print("  [PASS] 自由支座位置 API")
+
+
+class TestRegressionFixes:
+    """高风险缺陷回归测试。"""
+
+    def test_double_rebar_non_yield_branch(self):
+        r = calculate_bearing_capacity(BearingCapacityInput(
+            b=300, h=600, concrete_grade='C30', rebar_grade='HRB400',
+            a_s=40, a_s_prime=40, as_type='double',
+            as_given=1000, as_prime_given=900,
+        ))
+        assert r.status in ('ok', 'under_reinforced')
+        assert math.isfinite(r.mu)
+        assert r.x == 80
+        assert abs(r.xi - round(80 / r.h0, 3)) < 1e-12
+
+    def test_large_moment_routes_to_double_rebar(self):
+        r = calculate_reinforcement(ReinforcementInput(
+            M=800, b=300, h=600, concrete_grade='C30',
+            rebar_grade='HRB400', a_s=40,
+        ))
+        assert r.need_double is True
+        assert r.as_prime_req > 0
+        assert math.isfinite(r.as_req)
+        assert all(s.area >= r.as_req for s in r.schemes)
+
+    def test_falling_head_cm2_conversion(self):
+        r = calculate_darcy_law(DarcyLawInput(
+            a=0.785, L=0.1, A=0.005, t=3600, h1=120, h2=80,
+        ))
+        expected = 0.785e-4 * 0.1 / (0.005 * 3600) * math.log(120 / 80)
+        assert abs(r.k - expected) < 1e-12
+
+    def test_constant_head_q_is_total_volume(self):
+        r = calculate_darcy_law(DarcyLawInput(
+            Q=0.002, L=0.2, A=0.01, delta_h=1.5, t=600,
+        ))
+        assert abs(r.k - 0.002 * 0.2 / (0.01 * 1.5 * 600)) < 1e-12
+        assert abs(r.v - 0.002 / (0.01 * 600)) < 1e-12
+
+    def test_composite_hole_first_moment(self):
+        r = calculate_composite_section([
+            CompositeBlock(b=100, h=100, y0=0),
+            CompositeBlock(b=20, h=20, y0=40, x0=40, is_hole=True),
+        ])
+        assert r.S_z == 124000
+
+    def test_derived_saturation_must_be_physical(self):
+        try:
+            calculate_soil_three_phase(SoilThreePhaseInput(Gs=2.7, w=0.5, e=0.5))
+        except ValueError as exc:
+            assert '饱和度' in str(exc)
+        else:
+            raise AssertionError('不合理的推导饱和度应被拒绝')
+
+    def test_q355_bearing_strength_table(self):
+        r = calculate_bolt_connection(BoltConnectionInput(
+            bolt_type='ordinary', diameter=20, bolt_count=1,
+            bolt_grade='4.6', steel_grade='Q355', connected_thickness=10,
+        ))
+        assert r['details']['fcb'] == 385.0
+        assert abs(r['details']['bearing_capacity'] - 77.0) < 0.001
+
+
 if __name__ == '__main__':
     print("=" * 60)
     print("土木工程计算工具箱 — 单元测试")
@@ -721,6 +1018,9 @@ if __name__ == '__main__':
     tests_shear = TestShearCapacity()
     tests_api = TestAPI()
     tests_section = TestSectionProperties()
+    tests_bolt = TestBoltConnection()
+    tests_beam = TestBeamInternalForces()
+    tests_regression = TestRegressionFixes()
 
     all_passed = 0
     all_total = 0
@@ -770,6 +1070,37 @@ if __name__ == '__main__':
         if name.startswith('test_'):
             try:
                 getattr(tests_section, name)()
+                all_passed += 1
+            except Exception as e:
+                print(f"  [FAIL] {name} FAILED: {e}")
+            all_total += 1
+
+    print()
+    for name in dir(tests_bolt):
+        if name.startswith('test_'):
+            try:
+                getattr(tests_bolt, name)()
+                all_passed += 1
+            except Exception as e:
+                print(f"  [FAIL] {name} FAILED: {e}")
+            all_total += 1
+
+    print()
+    for name in dir(tests_beam):
+        if name.startswith('test_'):
+            try:
+                getattr(tests_beam, name)()
+                all_passed += 1
+            except Exception as e:
+                print(f"  [FAIL] {name} FAILED: {e}")
+            all_total += 1
+
+    print()
+    for name in dir(tests_regression):
+        if name.startswith('test_'):
+            try:
+                getattr(tests_regression, name)()
+                print(f"  [PASS] {name}")
                 all_passed += 1
             except Exception as e:
                 print(f"  [FAIL] {name} FAILED: {e}")

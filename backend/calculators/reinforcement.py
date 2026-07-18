@@ -96,29 +96,21 @@ def _calc_single_rebar(inp: ReinforcementInput, fc: float, fy: float,
     steps.append(f"   = {M_n_mm:.0f} / ({alpha1} × {fc} × {b:.0f} × {h0:.0f}²)")
     steps.append(f"   = {alpha_s:.4f}")
 
-    # 2. 计算相对受压区高度 ξ
-    if alpha_s > 0.5 * (1 + xi_b):  # 数学上无效（但实际上 αs_max ≈ ξb*(1-0.5*ξb)）
-        steps.append(f"\n⚠ αs = {alpha_s:.4f} > αs_max，单筋截面无法满足，需要双筋！")
-        return ReinforcementResult(
-            h0=h0, fc=fc, fy=fy, alpha1=alpha1, xi_b=xi_b, rho_min=rho_min,
-            alpha_s=round(alpha_s, 4), xi=xi_b, gamma_s=0.0,
-            as_req=0, as_min=rho_min * b * inp.h,
-            as_max=xi_b * alpha1 * fc * b * h0 / fy,
-            need_double=True,
-            status="need_double",
-            message="单筋截面不足，需要配置受压钢筋（双筋截面）",
-            steps=steps,
-        )
+    # 2. 计算相对受压区高度 ξ。先按界限受压区判断，避免对负数开平方。
+    alpha_s_max = xi_b * (1 - 0.5 * xi_b)
+    if alpha_s > alpha_s_max:
+        xi = xi_b
+        steps.append(f"\n2. αs = {alpha_s:.4f} > αs,max = ξb(1-0.5ξb) = {alpha_s_max:.4f}")
+        steps.append("   单筋截面无法满足，按 ξ = ξb 转入双筋设计。")
+    else:
+        xi = 1 - np.sqrt(1 - 2 * alpha_s)
+        steps.append(f"\n2. 相对受压区高度 ξ = 1 - √(1 - 2αs)")
+        steps.append(f"   = 1 - √(1 - 2 × {alpha_s:.4f})")
+        steps.append(f"   = {xi:.4f}")
 
-    xi = 1 - np.sqrt(1 - 2 * alpha_s)
-    steps.append(f"\n2. 相对受压区高度 ξ = 1 - √(1 - 2αs)")
-    steps.append(f"   = 1 - √(1 - 2 × {alpha_s:.4f})")
-    steps.append(f"   = {xi:.4f}")
-
-    if xi > xi_b:
+    if alpha_s > alpha_s_max or xi > xi_b:
         steps.append(f"   ξ = {xi:.4f} > ξb = {xi_b:.4f}，需要双筋截面！")
         # 按 ξ = ξb 计算单筋部分最大弯矩
-        alpha_s_max = xi_b * (1 - 0.5 * xi_b)
         M1_max = alpha1 * fc * b * h0 * h0 * alpha_s_max / 1e6  # kN·m
         M2 = inp.M - M1_max
         steps.append(f"   按 ξ=ξb 计算单筋部分: M1_max = {M1_max:.2f} kN·m")
@@ -193,7 +185,7 @@ def _generate_schemes(As_req: float, diameters: List[int], rebar_grade: str) -> 
         max_count = 10
         for n in range(2, max_count + 1):
             area = n * single_area
-            if area >= As_req * 0.95 and area <= As_req * 1.30:  # 误差 -5% ~ +30%
+            if area >= As_req and area <= As_req * 1.30:  # 不得小于计算所需面积
                 layout = "单排" if n <= 5 else "双排"
                 schemes.append(RebarScheme(
                     description=f"{n}Φ{d}",

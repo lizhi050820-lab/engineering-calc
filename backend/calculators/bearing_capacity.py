@@ -326,17 +326,28 @@ def _calc_double_reinforced(inp: BearingCapacityInput, fc: float, fy: float,
         xi = x / h0
 
         # 检查受压钢筋是否屈服: x ≥ 2a_s'
+        x_result = x
         if x < 2 * a_s_prime:
             steps.append(f"受压钢筋未屈服 (x={x:.2f} < 2a_s'={2*a_s_prime:.0f})")
             steps.append(f"取 x = 2a_s', 对受压钢筋合力点取矩:")
             mu_n_mm = fy * As * (h0 - a_s_prime)
             mu = mu_n_mm / 1e6
+            x_result = 2 * a_s_prime
+            xi = x_result / h0
             steps.append(f"  Mu = fy·As·(h₀-a_s') = {fy}×{As:.1f}×({h0:.0f}-{a_s_prime:.0f})")
             steps.append(f"     = {mu:.2f} kN·m")
+            if As / (b * inp.h) < rho_min:
+                status = "under_reinforced"
+                message = "少筋！受拉配筋率不满足最小要求"
+            else:
+                status = "ok"
+                message = f"受压钢筋未屈服，按 x < 2a_s' 的简化公式计算，Mu = {mu:.2f} kN·m"
         elif xi > xi_b:
             steps.append(f"超筋！ξ = {xi:.4f} > ξb = {xi_b:.4f}")
             steps.append(f"取 ξ = ξb 计算:")
             x = xi_b * h0
+            x_result = x
+            xi = xi_b
             mu_n_mm = alpha1 * fc * b * x * (h0 - x / 2) + fy * As_prime * (h0 - a_s_prime)
             mu = mu_n_mm / 1e6
             status = "over_reinforced"
@@ -362,7 +373,7 @@ def _calc_double_reinforced(inp: BearingCapacityInput, fc: float, fy: float,
             h0=h0, fc=fc, fy=fy, alpha1=alpha1,
             xi_b=round(xi_b, 3), rho_min=round(rho_min, 4),
             rho_max=round(xi_b * alpha1 * fc / fy, 4),
-            x=round(x, 3), xi=round(xi, 3),
+            x=round(x_result, 3), xi=round(xi, 3),
             as_req=As, mu=round(mu, 3),
             status=status, message=message, steps=steps,
         )

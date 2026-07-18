@@ -1,62 +1,27 @@
 /**
- * API 工具模块
+ * 统一计算入口
  *
- * 封装与 Python FastAPI 后端的通信。
- *
- * 开发阶段：
- *   - 微信开发者工具中需勾选「不校验合法域名」
- *   - 真机调试需要通过内网穿透（如 ngrok）暴露后端
- *   - 上线后改为正式的 HTTPS 域名
+ * GitHub Pages 主版本与微信小程序均使用浏览器/设备本地计算。
+ * Python FastAPI 保留为公式参考实现与自动回归测试基准。
  */
 
-// ⚠ 开发时改为你的实际地址：
-//    - 模拟器: http://127.0.0.1:8000
-//    - 真机(同WiFi): http://192.168.x.x:8000
-//    - 内网穿透: https://xxx.ngrok-free.app
-const BASE_URL = 'http://127.0.0.1:8000'
-
-/**
- * 通用请求函数
- */
-function request(url, options = {}) {
-  return new Promise((resolve, reject) => {
-    uni.request({
-      url: BASE_URL + url,
-      method: options.method || 'GET',
-      data: options.data || {},
-      header: {
-        'Content-Type': 'application/json',
-        ...options.header,
-      },
-      timeout: 15000,
-      success: (res) => {
-        if (res.statusCode === 200) {
-          resolve(res.data)
-        } else {
-          uni.showToast({
-            title: res.data?.detail || '请求失败',
-            icon: 'none',
-          })
-          reject(res)
-        }
-      },
-      fail: (err) => {
-        uni.showToast({
-          title: '网络连接失败，请检查后端服务',
-          icon: 'none',
-          duration: 2500,
-        })
-        reject(err)
-      },
-    })
-  })
-}
+import { localApi } from './calculators/common.js'
+import { calculateSoilThreePhase } from './calculators/soil-three-phase.js'
+import { calculateDarcyLaw } from './calculators/darcy-law.js'
+import { calculateBeamForces } from './calculators/beam-forces.js'
+import { materialReferences } from './calculators/materials.js'
+import { calculateBearingCapacity } from './calculators/bearing-capacity.js'
+import { calculateReinforcement } from './calculators/reinforcement.js'
+import { calculateSectionDesign } from './calculators/section-design.js'
+import { calculateSectionProperties } from './calculators/section-properties.js'
+import { calculateCompositeSection } from './calculators/composite-section.js'
+import { calculateBoltConnection } from './calculators/bolt-connection.js'
 
 /**
  * 获取材料参数参考表（混凝土、钢筋数据）
  */
 export function getReferences() {
-  return request('/api/references')
+  return Promise.resolve(materialReferences())
 }
 
 /**
@@ -72,10 +37,7 @@ export function getReferences() {
  * @param {number} [params.as_prime_given] - 已知受压钢筋面积（双筋校核）
  */
 export function calcBearingCapacity(params) {
-  return request('/api/calculate/bearing-capacity', {
-    method: 'POST',
-    data: params,
-  })
+  return localApi(calculateBearingCapacity, params)
 }
 
 /**
@@ -90,10 +52,7 @@ export function calcBearingCapacity(params) {
  * @param {number[]} [params.bar_diameters] - 可选钢筋直径
  */
 export function calcReinforcement(params) {
-  return request('/api/calculate/reinforcement', {
-    method: 'POST',
-    data: params,
-  })
+  return localApi(calculateReinforcement, params)
 }
 
 /**
@@ -113,10 +72,7 @@ export function calcReinforcement(params) {
  * @param {number} [params.stirrup_spacing] - 箍筋间距
  */
 export function calcSectionDesign(params) {
-  return request('/api/calculate/section-design', {
-    method: 'POST',
-    data: params,
-  })
+  return localApi(calculateSectionDesign, params)
 }
 
 /**
@@ -134,10 +90,7 @@ export function calcSectionDesign(params) {
  * @param {number} [params.D] - 外径 (mm) — 环形
  */
 export function calcSectionProperties(params) {
-  return request('/api/calculate/section-properties', {
-    method: 'POST',
-    data: params,
-  })
+  return localApi(calculateSectionProperties, params)
 }
 
 /**
@@ -151,10 +104,7 @@ export function calcSectionProperties(params) {
  * @param {string} [params.blocks[].label] - 分块名称
  */
 export function calcCompositeSection(params) {
-  return request('/api/calculate/composite-section', {
-    method: 'POST',
-    data: params,
-  })
+  return localApi(calculateCompositeSection, params)
 }
 
 /**
@@ -175,10 +125,7 @@ export function calcCompositeSection(params) {
  * @param {number} [params.gamma_w] - 水的重度，默认 9.81
  */
 export function calcSoilThreePhase(params) {
-  return request('/api/calculate/soil-three-phase', {
-    method: 'POST',
-    data: params,
-  })
+  return localApi(calculateSoilThreePhase, params)
 }
 
 /**
@@ -186,8 +133,15 @@ export function calcSoilThreePhase(params) {
  * @param {Object} params - 已知参数（任意子集）
  */
 export function calcDarcyLaw(params) {
-  return request('/api/calculate/darcy-law', {
-    method: 'POST',
-    data: params,
-  })
+  return localApi(calculateDarcyLaw, params)
+}
+
+/** 钢结构螺栓连接承载力计算 */
+export function calcBoltConnection(params) {
+  return localApi(calculateBoltConnection, params)
+}
+
+/** 结构力学常见梁内力速算 */
+export function calcBeamForces(params) {
+  return localApi(calculateBeamForces, params)
 }

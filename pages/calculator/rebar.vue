@@ -23,7 +23,7 @@
       </view>
 
       <view class="form-group">
-        <view class="form-label">受拉区 a_s (mm)</view>
+        <view class="form-label">受拉区 aₛ (mm)</view>
         <input class="form-input" v-model.number="form.a_s" type="digit" placeholder="默认 40" />
       </view>
 
@@ -98,7 +98,7 @@
 
         <view class="calc-row">
           <text class="calc-key">有效高度</text>
-          <text class="calc-val">h₀ = h − a_s = {{ form.h }} − {{ form.a_s }} = {{ result.data.h0 }} mm</text>
+          <text class="calc-val">h₀ = h − aₛ = {{ form.h }} − {{ form.a_s }} = {{ result.data.h0 }} mm</text>
         </view>
         <view class="calc-hr"></view>
 
@@ -110,7 +110,7 @@
 
         <view class="calc-row">
           <text class="calc-key">抵抗矩系数</text>
-          <text class="calc-val">αs = M / (α₁·fc·b·h₀²) = {{ result.data.alpha_s }}</text>
+          <text class="calc-val">αₛ = M / (α₁ · f꜀ · b · h₀²) = {{ result.data.alpha_s }}</text>
         </view>
         <view class="calc-hr"></view>
 
@@ -122,13 +122,13 @@
 
         <view class="calc-row">
           <text class="calc-key">内力臂系数</text>
-          <text class="calc-val">γs = 0.5·(1 + √(1 − 2αs)) = {{ result.data.gamma_s }}</text>
+          <text class="calc-val">γₛ = 0.5 · (1 + √(1 − 2αₛ)) = {{ result.data.gamma_s }}</text>
         </view>
         <view class="calc-hr"></view>
 
         <view class="calc-row">
           <text class="calc-key">配筋面积</text>
-          <text class="calc-val">As = M / (fy·γs·h₀) = {{ result.data.as_req }} mm²</text>
+          <text class="calc-val">Aₛ = M / (fᵧ · γₛ · h₀) = {{ result.data.as_req }} mm²</text>
         </view>
         <view class="calc-hr"></view>
 
@@ -140,19 +140,19 @@
 
         <view class="calc-row">
           <text class="calc-key">最小配筋</text>
-          <text class="calc-val">As_min = ρ_min·b·h = {{ result.data.as_min }} mm² (ρ_min = {{ result.data.rho_min }})</text>
+          <text class="calc-val">Aₛ,min = ρmin · b · h = {{ result.data.as_min }} mm²（ρmin = {{ result.data.rho_min }}）</text>
         </view>
         <view class="calc-hr"></view>
 
         <view class="calc-row">
           <text class="calc-key">单筋上限</text>
-          <text class="calc-val">As_max = ξb·α₁·fc·b·h₀/fy = {{ result.data.as_max }} mm²</text>
+          <text class="calc-val">Aₛ,max = ξb · α₁ · f꜀ · b · h₀ / fᵧ = {{ result.data.as_max }} mm²</text>
         </view>
         <view class="calc-hr"></view>
 
         <view v-if="result.data.need_double" class="calc-row">
           <text class="calc-key">受压钢筋</text>
-          <text class="calc-val" style="color:#C62828;">需双筋截面，As' = {{ result.data.as_prime_req }} mm²</text>
+          <text class="calc-val" style="color:#C62828;">需双筋截面，A′ₛ = {{ result.data.as_prime_req }} mm²</text>
         </view>
         <view v-if="result.data.need_double" class="calc-hr"></view>
       </view>
@@ -295,7 +295,7 @@ export default {
 .highlight-input {
   font-size: 36rpx;
   font-weight: 700;
-  color: #2C6FCE;
+  color: #14575B;
   text-align: center;
 }
 
@@ -308,7 +308,7 @@ export default {
 
 .diameter-tag {
   padding: 12rpx 24rpx;
-  background: #F5F6FA;
+  background: #F0EFEB;
   border-radius: 24rpx;
   font-size: 26rpx;
   color: #666;
@@ -317,8 +317,8 @@ export default {
 
 .diameter-tag.selected {
   background: #E8F0FF;
-  color: #2C6FCE;
-  border-color: #2C6FCE;
+  color: #14575B;
+  border-color: #14575B;
   font-weight: 600;
 }
 
@@ -363,15 +363,18 @@ export default {
 .calc-key {
   width: 170rpx;
   flex-shrink: 0;
-  font-size: 26rpx;
-  color: #333;
-  font-weight: 500;
+  font-size: 24rpx;
+  color: #526B6C;
+  font-weight: 600;
+  padding-top: 5rpx;
 }
 .calc-val {
   flex: 1;
-  font-size: 26rpx;
-  color: #111;
-  line-height: 1.5;
+  font-size: 28rpx;
+  color: #17383A;
+  line-height: 1.75;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: .3rpx;
 }
 .calc-hr {
   height: 1rpx;
@@ -396,12 +399,12 @@ export default {
   padding: 20rpx;
   border: 2rpx solid transparent;
 }
-.scheme-item:first-child { border-color: #2C6FCE; background: #F0F6FF; }
+.scheme-item:first-child { border-color: #2C8884; background: #E8F2F0; }
 .scheme-rank {
   width: 40rpx; height: 40rpx;
   line-height: 40rpx; text-align: center;
   font-size: 24rpx; font-weight: 700; color: #fff;
-  background: #2C6FCE;
+  background: #14575B;
   border-radius: 50%;
   margin-right: 16rpx;
   flex-shrink: 0;

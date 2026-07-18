@@ -4,7 +4,7 @@
 			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "土木工程计算工具箱",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -12,7 +12,7 @@
 			"path": "pages/category/concrete",
 			"style": {
 				"navigationBarTitleText": "混凝土结构设计",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -20,7 +20,7 @@
 			"path": "pages/category/section",
 			"style": {
 				"navigationBarTitleText": "截面几何性质",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -28,7 +28,39 @@
 			"path": "pages/category/soil",
 			"style": {
 				"navigationBarTitleText": "土力学计算",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/category/steel",
+			"style": {
+				"navigationBarTitleText": "钢结构设计",
+				"navigationBarBackgroundColor": "#123F43",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/category/mechanics",
+			"style": {
+				"navigationBarTitleText": "结构力学速算",
+				"navigationBarBackgroundColor": "#123F43",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/calculator/beam-forces",
+			"style": {
+				"navigationBarTitleText": "梁内力速算",
+				"navigationBarBackgroundColor": "#123F43",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
+			"path": "pages/calculator/bolt-connection",
+			"style": {
+				"navigationBarTitleText": "螺栓连接承载力",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -36,7 +68,7 @@
 			"path": "pages/calculator/soil-three-phase",
 			"style": {
 				"navigationBarTitleText": "三相比例指标计算",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -44,7 +76,7 @@
 			"path": "pages/calculator/darcy-law",
 			"style": {
 				"navigationBarTitleText": "达西定律渗透计算",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -52,7 +84,7 @@
 			"path": "pages/calculator/bearing",
 			"style": {
 				"navigationBarTitleText": "正截面承载力计算",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -60,7 +92,7 @@
 			"path": "pages/calculator/section-design",
 			"style": {
 				"navigationBarTitleText": "截面设计",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -68,7 +100,7 @@
 			"path": "pages/calculator/rebar",
 			"style": {
 				"navigationBarTitleText": "配筋计算",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -76,7 +108,7 @@
 			"path": "pages/calculator/section-props",
 			"style": {
 				"navigationBarTitleText": "截面几何性质计算",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		},
@@ -84,15 +116,16 @@
 			"path": "pages/calculator/composite-section",
 			"style": {
 				"navigationBarTitleText": "组合截面（平行移轴）",
-				"navigationBarBackgroundColor": "#2C6FCE",
+				"navigationBarBackgroundColor": "#123F43",
 				"navigationBarTextStyle": "white"
 			}
 		}
 	],
+	"subPackages": [],
 	"globalStyle": {
 		"navigationBarTextStyle": "white",
 		"navigationBarTitleText": "土木工程计算工具箱",
-		"navigationBarBackgroundColor": "#2C6FCE",
-		"backgroundColor": "#F5F6FA"
+		"navigationBarBackgroundColor": "#123F43",
+		"backgroundColor": "#EEF1EF"
 	}
 }
