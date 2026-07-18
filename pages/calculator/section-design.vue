@@ -64,12 +64,12 @@
       </view>
       <view class="grid-2" style="margin-top: 20rpx;">
         <view class="form-group">
-          <text class="form-label">受拉区 a_s (mm)</text>
+          <text class="form-label">受拉区 aₛ (mm)</text>
           <text class="form-hint">钢筋中心→截面底边</text>
           <input class="form-input" type="digit" v-model.number="form.a_s" placeholder="40" />
         </view>
         <view v-if="form.as_type === 'double'" class="form-group">
-          <text class="form-label">受压区 a_s' (mm)</text>
+          <text class="form-label">受压区 a′ₛ (mm)</text>
           <text class="form-hint">钢筋中心→截面顶边</text>
           <input class="form-input" type="digit" v-model.number="form.a_s_prime" placeholder="40" />
         </view>
@@ -151,7 +151,7 @@
         <view class="card-title">正截面承载力（受弯）</view>
 
         <view class="calc-hero">
-          <text class="calc-hero-label">{{ checkMode ? '极限弯矩 Mu' : '单筋最大承载力 Mu_max' }}</text>
+          <text class="calc-hero-label">{{ checkMode ? '极限弯矩 Mᵤ' : '单筋最大承载力 Mᵤ,max' }}</text>
           <text class="calc-hero-value">{{ result.data.flexural.mu }}<text class="calc-hero-unit"> kN·m</text></text>
           <text class="status-tag" :class="statusFlexClass">{{ result.data.flexural.status === 'ok' ? '适筋' : result.data.flexural.status }}</text>
         </view>
@@ -165,7 +165,7 @@
 
           <view class="calc-row">
             <text class="calc-key">有效高度</text>
-            <text class="calc-val">h₀ = h − a_s = {{ form.h }} − {{ form.a_s }} = {{ result.data.flexural.h0 }} mm</text>
+            <text class="calc-val">h₀ = h − aₛ = {{ form.h }} − {{ form.a_s }} = {{ result.data.flexural.h0 }} mm</text>
           </view>
           <view class="calc-hr"></view>
 
@@ -176,7 +176,7 @@
           <view class="calc-hr"></view>
 
           <view class="calc-row">
-            <text class="calc-key">ρ_min / ρ_max</text>
+            <text class="calc-key">ρmin / ρmax</text>
             <text class="calc-val">{{ result.data.flexural.rho_min }} / {{ result.data.flexural.rho_max }}</text>
           </view>
           <view class="calc-hr"></view>
@@ -196,7 +196,7 @@
             <template v-if="form.as_type === 'single'">
               <view class="calc-row">
                 <text class="calc-key">配筋范围 (受拉)</text>
-                <text class="calc-val">As_min = {{ asMin }} ~ As_max = {{ asMax }} mm²</text>
+                <text class="calc-val">Aₛ,min = {{ asMin }} ～ Aₛ,max = {{ asMax }} mm²</text>
               </view>
               <view class="calc-hr"></view>
 
@@ -213,7 +213,7 @@
             <template v-if="form.as_type === 'double'">
               <view class="calc-row">
                 <text class="calc-key">单筋上限 (受拉)</text>
-                <text class="calc-val">As₁ = {{ result.data.flexural.as_req }} mm²（ρ_max = {{ result.data.flexural.rho_max }}）</text>
+                <text class="calc-val">Aₛ₁ = {{ result.data.flexural.as_req }} mm²（ρmax = {{ result.data.flexural.rho_max }}）</text>
               </view>
               <view class="calc-hr"></view>
               <template v-if="result.data.flexural.design_points">
@@ -221,7 +221,7 @@
                 <view v-for="pt in result.data.flexural.design_points" :key="pt.label" class="calc-row">
                   <text class="calc-key">{{ pt.label }}</text>
                   <text class="calc-val">
-                    <text style="color:#C62828;">As' = {{ pt.As_prime }}</text>
+                    <text style="color:#C62828;">A′ₛ = {{ pt.As_prime }}</text>
                     <text style="margin:0 6rpx;">+</text>
                     <text style="color:#2E7D32;">As = {{ pt.As }}</text>
                     <text> mm²</text>
@@ -239,7 +239,7 @@
         <view class="card-title">斜截面受剪承载力</view>
 
         <view class="calc-hero">
-          <text class="calc-hero-label">受剪承载力 {{ form.stirrup_diameter ? 'V_cs' : 'V_c' }}</text>
+          <text class="calc-hero-label">受剪承载力 {{ form.stirrup_diameter ? 'V꜀ₛ' : 'V꜀' }}</text>
           <text class="calc-hero-value">{{ form.stirrup_diameter ? result.data.shear.V_cs : result.data.shear.V_c }}<text class="calc-hero-unit"> kN</text></text>
           <text class="status-tag" :class="statusShearClass">{{ result.data.shear.status === 'ok' ? '满足' : result.data.shear.status }}</text>
         </view>
@@ -247,35 +247,35 @@
         <view class="calc-process">
           <view class="calc-row">
             <text class="calc-key">材料参数</text>
-            <text class="calc-val">fc = {{ result.data.shear.fc }} MPa, ft = {{ result.data.shear.ft }} MPa, fyv = {{ result.data.shear.f_yv }} MPa</text>
+            <text class="calc-val">f꜀ = {{ result.data.shear.fc }} MPa，fₜ = {{ result.data.shear.ft }} MPa，fᵧᵥ = {{ result.data.shear.f_yv }} MPa</text>
           </view>
           <view class="calc-hr"></view>
 
           <view class="calc-row">
             <text class="calc-key">截面限制</text>
-            <text class="calc-val">V_max = {{ result.data.shear.V_max }} kN（β_c = {{ result.data.shear.beta_c }}）</text>
+            <text class="calc-val">Vmax = {{ result.data.shear.V_max }} kN（β꜀ = {{ result.data.shear.beta_c }}）</text>
           </view>
           <view class="calc-hr"></view>
 
           <view class="calc-row">
-            <text class="calc-key">混凝土项 V_c</text>
-            <text class="calc-val">{{ result.data.shear.V_c }} kN（β_h = {{ result.data.shear.beta_h }}）</text>
+            <text class="calc-key">混凝土项 V꜀</text>
+            <text class="calc-val">{{ result.data.shear.V_c }} kN（βₕ = {{ result.data.shear.beta_h }}）</text>
           </view>
           <view class="calc-hr"></view>
 
           <template v-if="result.data.shear.A_sv > 0">
             <view class="calc-row">
-              <text class="calc-key">箍筋面积 A_sv</text>
+              <text class="calc-key">箍筋面积 Aₛᵥ</text>
               <text class="calc-val">{{ result.data.shear.A_sv }} mm²</text>
             </view>
             <view class="calc-hr"></view>
             <view class="calc-row">
               <text class="calc-key">配箍率</text>
-              <text class="calc-val">ρ_sv = {{ result.data.shear.rho_sv }}（≥ ρ_sv_min = {{ result.data.shear.rho_sv_min }}）</text>
+              <text class="calc-val">ρₛᵥ = {{ result.data.shear.rho_sv }}（≥ ρₛᵥ,min = {{ result.data.shear.rho_sv_min }}）</text>
             </view>
             <view class="calc-hr"></view>
             <view v-if="result.data.shear.V_cs > 0" class="calc-row">
-              <text class="calc-key">总承载力 V_cs</text>
+              <text class="calc-key">总承载力 V꜀ₛ</text>
               <text class="calc-val">{{ result.data.shear.V_cs }} kN</text>
             </view>
           </template>
@@ -420,10 +420,10 @@ export default {
 .card-title { font-size: 30rpx; font-weight: 600; color: #222; margin-bottom: 20rpx; padding-bottom: 12rpx; border-bottom: 1rpx solid #eee; }
 .form-label { display: block; font-size: 26rpx; color: #333; margin-bottom: 6rpx; font-weight: 500; }
 .form-hint { display: block; font-size: 22rpx; color: #999; margin-bottom: 8rpx; }
-.form-picker { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 80rpx; background: #F5F6FA; border-radius: 12rpx; padding: 0 24rpx; font-size: 30rpx; }
-.type-toggle { display: flex; background: #F5F6FA; border-radius: 10rpx; padding: 4rpx; }
+.form-picker { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 80rpx; background: #F0EFEB; border-radius: 15rpx; padding: 0 24rpx; font-size: 30rpx; }
+.type-toggle { display: flex; background: #E5E9E6; border-radius: 14rpx; padding: 5rpx; }
 .type-btn { flex: 1; text-align: center; padding: 20rpx 0; font-size: 28rpx; color: #666; border-radius: 8rpx; }
-.type-btn.active { background: #2C6FCE; color: #fff; font-weight: 600; }
+.type-btn.active { background: #14575B; color: #fff; font-weight: 600; }
 
 /* ========== 结果 ========== */
 .calc-hero { text-align: center; padding: 16rpx 0 24rpx; }
@@ -432,8 +432,8 @@ export default {
 .calc-hero-unit { font-size: 28rpx; font-weight: 500; color: #999; }
 .calc-process { margin-top: 8rpx; }
 .calc-row { display: flex; align-items: baseline; padding: 16rpx 0; }
-.calc-key { width: 170rpx; flex-shrink: 0; font-size: 26rpx; color: #333; font-weight: 500; }
-.calc-val { flex: 1; font-size: 26rpx; color: #111; line-height: 1.5; }
+.calc-key { width:170rpx;flex-shrink:0;font-size:24rpx;color:#526B6C;font-weight:600;padding-top:5rpx; }
+.calc-val { flex:1;font-size:28rpx;color:#17383A;line-height:1.75;font-variant-numeric:lining-nums tabular-nums;letter-spacing:.3rpx; }
 .calc-hr { height: 1rpx; background: #E8E8E8; }
 .calc-section-label { font-size: 26rpx; color: #333; font-weight: 600; padding: 12rpx 0 4rpx; }
 </style>

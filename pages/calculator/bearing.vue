@@ -69,12 +69,12 @@
       <view class="card-title">保护层厚度</view>
       <view class="grid-2">
         <view class="form-group">
-          <text class="form-label">受拉区 a_s (mm)</text>
+          <text class="form-label">受拉区 aₛ (mm)</text>
           <text class="form-hint">钢筋中心→截面底边</text>
           <input class="form-input" v-model.number="form.a_s" type="digit" placeholder="40" />
         </view>
         <view v-if="asType === 'double'" class="form-group">
-          <text class="form-label">受压区 a_s' (mm)</text>
+          <text class="form-label">受压区 a′ₛ (mm)</text>
           <text class="form-hint">钢筋中心→截面顶边</text>
           <input class="form-input" v-model.number="form.a_s_prime" type="digit" placeholder="40" />
         </view>
@@ -109,7 +109,7 @@
     <!-- ========== 结果 ========== -->
     <view class="card" v-if="result">
       <view class="calc-hero">
-        <text class="calc-hero-label">{{ mode === 'check' ? '极限弯矩 Mu' : '单筋最大承载力 Mu_max' }}</text>
+        <text class="calc-hero-label">{{ mode === 'check' ? '极限弯矩 Mᵤ' : '单筋最大承载力 Mᵤ,max' }}</text>
         <text class="calc-hero-value">{{ result.data.mu }}<text class="calc-hero-unit"> kN·m</text></text>
         <text class="status-tag" :class="statusClass">{{ result.message }}</text>
       </view>
@@ -123,7 +123,7 @@
 
         <view class="calc-row">
           <text class="calc-key">有效高度</text>
-          <text class="calc-val">h₀ = h − a_s = {{ form.h }} − {{ form.a_s }} = {{ result.data.h0 }} mm</text>
+          <text class="calc-val">h₀ = h − aₛ = {{ form.h }} − {{ form.a_s }} = {{ result.data.h0 }} mm</text>
         </view>
         <view class="calc-hr"></view>
 
@@ -134,7 +134,7 @@
         <view class="calc-hr"></view>
 
         <view class="calc-row">
-          <text class="calc-key">ρ_min / ρ_max</text>
+          <text class="calc-key">ρmin / ρmax</text>
           <text class="calc-val">{{ result.data.rho_min }} / {{ result.data.rho_max }}</text>
         </view>
         <view class="calc-hr"></view>
@@ -154,7 +154,7 @@
           <template v-if="asType === 'single'">
             <view class="calc-row">
               <text class="calc-key">配筋范围</text>
-              <text class="calc-val">As_min = {{ asMin }} ~ As_max = {{ asMax }} mm²</text>
+              <text class="calc-val">Aₛ,min = {{ asMin }} ～ Aₛ,max = {{ asMax }} mm²</text>
             </view>
             <view class="calc-hr"></view>
 
@@ -170,7 +170,7 @@
           <template v-if="asType === 'double'">
             <view class="calc-row">
               <text class="calc-key">单筋上限</text>
-              <text class="calc-val">As₁ = {{ result.data.as_req }} mm²（受拉）, Mu_max = {{ result.data.mu }} kN·m</text>
+              <text class="calc-val">Aₛ₁ = {{ result.data.as_req }} mm²（受拉），Mᵤ,max = {{ result.data.mu }} kN·m</text>
             </view>
             <view class="calc-hr"></view>
             <template v-if="result.data.design_points">
@@ -178,7 +178,7 @@
               <view v-for="pt in result.data.design_points" :key="pt.label" class="calc-row">
                 <text class="calc-key">{{ pt.label }}</text>
                 <text class="calc-val">
-                  <text style="color:#C62828;">As' = {{ pt.As_prime }}</text>
+                  <text style="color:#C62828;">A′ₛ = {{ pt.As_prime }}</text>
                   <text style="margin:0 6rpx;">+</text>
                   <text style="color:#2E7D32;">As = {{ pt.As }}</text>
                   <text> mm²</text>
@@ -306,10 +306,10 @@ export default {
 .card-title { font-size: 30rpx; font-weight: 600; color: #222; margin-bottom: 20rpx; padding-bottom: 12rpx; border-bottom: 1rpx solid #eee; }
 .form-label { display: block; font-size: 26rpx; color: #333; margin-bottom: 6rpx; font-weight: 500; }
 .form-hint { display: block; font-size: 22rpx; color: #999; margin-bottom: 8rpx; }
-.form-picker { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 80rpx; background: #F5F6FA; border-radius: 12rpx; padding: 0 24rpx; font-size: 30rpx; }
-.type-toggle { display: flex; background: #F5F6FA; border-radius: 10rpx; padding: 4rpx; }
+.form-picker { display: flex; justify-content: space-between; align-items: center; width: 100%; height: 80rpx; background: #F0EFEB; border-radius: 15rpx; padding: 0 24rpx; font-size: 30rpx; }
+.type-toggle { display: flex; background: #E5E9E6; border-radius: 14rpx; padding: 5rpx; }
 .type-btn { flex: 1; text-align: center; padding: 20rpx 0; font-size: 28rpx; color: #666; border-radius: 8rpx; }
-.type-btn.active { background: #2C6FCE; color: #fff; font-weight: 600; }
+.type-btn.active { background: #14575B; color: #fff; font-weight: 600; }
 
 /* ========== 结果 ========== */
 .calc-hero { text-align: center; padding: 16rpx 0 24rpx; }
@@ -318,8 +318,8 @@ export default {
 .calc-hero-unit { font-size: 28rpx; font-weight: 500; color: #999; }
 .calc-process { margin-top: 8rpx; }
 .calc-row { display: flex; align-items: baseline; padding: 16rpx 0; }
-.calc-key { width: 170rpx; flex-shrink: 0; font-size: 26rpx; color: #333; font-weight: 500; }
-.calc-val { flex: 1; font-size: 26rpx; color: #111; line-height: 1.5; }
+.calc-key { width:170rpx;flex-shrink:0;font-size:24rpx;color:#526B6C;font-weight:600;padding-top:5rpx; }
+.calc-val { flex:1;font-size:28rpx;color:#17383A;line-height:1.75;font-variant-numeric:lining-nums tabular-nums;letter-spacing:.3rpx; }
 .calc-hr { height: 1rpx; background: #E8E8E8; }
 .calc-section-label { font-size: 26rpx; color: #333; font-weight: 600; padding: 12rpx 0 4rpx; }
 </style>

@@ -51,6 +51,8 @@ from calculators.darcy_law import (
     DarcyLawInput,
     calculate_darcy_law,
 )
+from calculators.bolt_connection import BoltConnectionInput, calculate_bolt_connection
+from calculators.beam_internal_forces import BeamForceInput, calculate_beam_forces
 
 app = FastAPI(
     title="土木工程计算工具箱",
@@ -261,6 +263,51 @@ class MaterialReferenceResponse(BaseModel):
     rebar_areas: dict
 
 
+class BoltConnectionRequest(BaseModel):
+    """钢结构螺栓连接承载力计算请求。"""
+    bolt_type: Literal["ordinary", "high_strength"] = "ordinary"
+    diameter: float = Field(..., gt=0, description="螺栓公称直径 (mm)")
+    bolt_count: int = Field(..., ge=1, description="螺栓数量")
+    shear_planes: int = Field(default=1, ge=1, le=4, description="普通螺栓受剪面数")
+    bolt_grade: str = Field(default="4.6", description="螺栓性能等级")
+    steel_grade: str = Field(default="Q235", description="连接板钢材牌号")
+    connected_thickness: float = Field(default=10, gt=0, description="同一受力方向承压构件总厚度 (mm)")
+    load: Optional[float] = Field(default=None, gt=0, description="连接承受的设计剪力 (kN)")
+    slip_coefficient: float = Field(default=0.45, gt=0, le=1, description="抗滑移系数 μ")
+    friction_surfaces: int = Field(default=1, ge=1, le=4, description="传力摩擦面数")
+    hole_type: Literal["standard", "oversize", "slotted"] = "standard"
+
+
+class BeamLoadRequest(BaseModel):
+    """梁上的一项基础荷载。"""
+    type: Literal["point", "udl", "moment"] = Field(..., description="集中力、均布荷载或集中弯矩")
+    value: float = Field(..., gt=0, description="荷载大小：kN、kN/m 或 kN·m")
+    x: Optional[float] = Field(default=None, ge=0, description="集中力或集中弯矩位置 (m)")
+    x1: Optional[float] = Field(default=None, ge=0, description="均布荷载起点 (m)")
+    x2: Optional[float] = Field(default=None, gt=0, description="均布荷载终点 (m)")
+    direction: Optional[Literal["clockwise", "counterclockwise"]] = Field(default=None, description="集中弯矩方向")
+
+
+class BeamForceRequest(BaseModel):
+    """结构力学静定梁多荷载内力速算请求。"""
+    beam_type: Literal["simply_supported", "cantilever", "overhanging"] = Field(..., description="梁型")
+    load_type: Literal[
+        "combined",
+        "mid_point", "point", "uniform", "end_point", "end_moment",
+        "overhang_end_point", "main_uniform",
+    ] = Field(default="combined", description="荷载工况；新版统一使用 combined")
+    L: float = Field(..., gt=0, description="主跨或悬臂长度 (m)")
+    loads: List[BeamLoadRequest] = Field(default_factory=list, max_length=20, description="可叠加的荷载清单")
+    P: Optional[float] = Field(default=None, gt=0, description="集中力 (kN)")
+    q: Optional[float] = Field(default=None, gt=0, description="均布荷载 (kN/m)")
+    M: Optional[float] = Field(default=None, gt=0, description="端部弯矩 (kN·m)")
+    a: Optional[float] = Field(default=None, gt=0, description="集中力距左支座距离 (m)")
+    c: Optional[float] = Field(default=None, gt=0, description="右外伸长度 (m)")
+    support_a: Optional[float] = Field(default=None, ge=0, description="A 支座距梁左端的位置 (m)")
+    support_b: Optional[float] = Field(default=None, gt=0, description="B 支座距梁左端的位置 (m)")
+    fixed_end: Optional[Literal["left", "right"]] = Field(default=None, description="悬臂梁固定端方向")
+
+
 # =============================================================================
 # API Endpoints
 # =============================================================================
@@ -279,9 +326,53 @@ def root():
             "POST /api/calculate/section-properties  截面几何性质计算",
             "POST /api/calculate/composite-section   组合截面（平行移轴）",
             "POST /api/calculate/soil-three-phase   土力学三相指标计算",
+            "POST /api/calculate/bolt-connection    螺栓连接承载力计算",
+            "POST /api/calculate/beam-forces        结构力学梁内力速算",
             "GET  /api/references                     材料参数参考表",
         ],
     }
+
+
+@app.post("/api/calculate/bolt-connection")
+def api_bolt_connection(req: BoltConnectionRequest):
+    """普通螺栓抗剪/承压及高强螺栓摩擦型连接抗滑移计算。"""
+    try:
+        result = calculate_bolt_connection(BoltConnectionInput(**req.model_dump()))
+        return {"success": True, "data": result, "message": "螺栓连接承载力计算完成"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/calculate/beam-forces")
+def api_beam_forces(req: BeamForceRequest):
+    """结构力学常见梁支座反力、最大剪力和最大弯矩速算。"""
+    try:
+        result = calculate_beam_forces(BeamForceInput(**req.model_dump()))
+        return {
+            "success": True,
+            "data": {
+                "beam_type": result.beam_type,
+                "load_type": result.load_type,
+                "L": result.L,
+                "RA": result.RA,
+                "RB": result.RB,
+                "fixed_moment": result.fixed_moment,
+                "Vmax": result.Vmax,
+                "Mmax": result.Mmax,
+                "x_Mmax": result.x_Mmax,
+                "M_positive": result.M_positive,
+                "x_M_positive": result.x_M_positive,
+                "M_negative": result.M_negative,
+                "x_M_negative": result.x_M_negative,
+                "key_values": result.key_values,
+                "diagram": result.diagram,
+                "steps": result.steps,
+                "status": result.status,
+            },
+            "message": result.message,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.post("/api/calculate/bearing-capacity", response_model=BearingCapacityResponse)

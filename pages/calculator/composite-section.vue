@@ -96,7 +96,7 @@
     <!-- 计算结果 -->
     <view class="card" v-if="result">
       <view class="calc-hero">
-        <text class="calc-hero-label">惯性矩 I_z</text>
+        <text class="calc-hero-label">惯性矩 Iᶻ</text>
         <text class="calc-hero-value">{{ formatSci(result.data.I_z) }}<text class="calc-hero-unit"> mm⁴</text></text>
         <text class="calc-hero-sub">{{ formatSci(result.data.I_z / 1e4) }} cm⁴</text>
         <text class="status-tag status-ok">计算完成</text>
@@ -115,37 +115,37 @@
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">惯性矩 I_z</text>
+          <text class="calc-key">惯性矩 Iᶻ</text>
           <text class="calc-val">{{ formatSci(result.data.I_z) }} mm⁴  =  {{ formatSci(result.data.I_z / 1e4) }} cm⁴</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">惯性矩 I_y</text>
+          <text class="calc-key">惯性矩 Iᵧ</text>
           <text class="calc-val">{{ formatSci(result.data.I_y) }} mm⁴  =  {{ formatSci(result.data.I_y / 1e4) }} cm⁴</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">抵抗矩 W_z_top</text>
+          <text class="calc-key">抵抗矩 Wᶻ,top</text>
           <text class="calc-val">{{ formatSci(result.data.W_z_top) }} mm³</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">抵抗矩 W_z_bot</text>
+          <text class="calc-key">抵抗矩 Wᶻ,bot</text>
           <text class="calc-val">{{ formatSci(result.data.W_z_bot) }} mm³</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">回转半径 i_z</text>
+          <text class="calc-key">回转半径 iᶻ</text>
           <text class="calc-val">{{ result.data.i_z }} mm</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">回转半径 i_y</text>
+          <text class="calc-key">回转半径 iᵧ</text>
           <text class="calc-val">{{ result.data.i_y }} mm</text>
         </view>
         <view class="calc-hr"></view>
         <view class="calc-row">
-          <text class="calc-key">面积矩 S_z</text>
+          <text class="calc-key">面积矩 Sᶻ</text>
           <text class="calc-val">{{ formatSci(result.data.S_z) }} mm³</text>
         </view>
       </view>
@@ -156,11 +156,11 @@
         <view class="calc-table-header">
           <text class="t-col t-col-name">分块</text>
           <text class="t-col">A (mm²)</text>
-          <text class="t-col">y_ci</text>
-          <text class="t-col">d_y</text>
-          <text class="t-col t-col-wide">I_zc (mm⁴)</text>
-          <text class="t-col t-col-wide">A·d_y² (mm⁴)</text>
-          <text class="t-col t-col-wide">I_z 贡献</text>
+          <text class="t-col">y꜀ᵢ</text>
+          <text class="t-col">dᵧ</text>
+          <text class="t-col t-col-wide">Iᶻ꜀ (mm⁴)</text>
+          <text class="t-col t-col-wide">A · dᵧ² (mm⁴)</text>
+          <text class="t-col t-col-wide">Iᶻ 贡献</text>
         </view>
         <view v-for="(d, idx) in result.data.block_details" :key="'det-'+idx"
           class="calc-table-row" :class="{ 'row-hole': d.is_hole }">
@@ -351,7 +351,7 @@ export default {
   bottom: 0;
   left: 0;
   height: 3rpx;
-  background: #2C6FCE;
+  background: #14575B;
   border-radius: 2rpx;
 }
 
@@ -362,7 +362,7 @@ export default {
   font-size: 22rpx;
   font-weight: 700;
   font-style: italic;
-  color: #2C6FCE;
+  color: #14575B;
 }
 
 /* ---- y 轴（竖直，x=0）---- */
@@ -453,7 +453,7 @@ export default {
   padding: 12rpx 24rpx;
   font-size: 24rpx;
   background: #F0F4FF;
-  color: #2C6FCE;
+  color: #14575B;
   border: 1rpx solid #C8D9F0;
   border-radius: 8rpx;
   line-height: 1;
@@ -508,7 +508,7 @@ export default {
   padding: 24rpx;
   text-align: center;
   font-size: 28rpx;
-  color: #2C6FCE;
+  color: #14575B;
   background: #fff;
   border: 2rpx dashed #C8D9F0;
   border-radius: 12rpx;
@@ -576,9 +576,11 @@ export default {
 
 .calc-val {
   flex: 1;
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #111;
-  line-height: 1.5;
+  line-height: 1.75;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: .3rpx;
 }
 
 .calc-hr {

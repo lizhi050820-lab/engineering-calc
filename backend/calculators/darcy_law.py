@@ -155,18 +155,20 @@ def _solve(known: Dict[str, float], gamma_w: float) -> Tuple[dict, List[DerivedV
                 changed = True
 
         # ---- (3) Q = v * A ----
-        if "v" in vals and "A" in vals and "Q" not in vals:
+        # 常水头试验中的 Q 是试验时段内的累计水量，不是瞬时流量。
+        is_constant_head = all(k in vals for k in ["Q", "L", "A", "delta_h", "t"])
+        if not is_constant_head and "v" in vals and "A" in vals and "Q" not in vals:
             vals["Q"] = vals["v"] * vals["A"]
             derivations.append(DerivedValue("Q", vals["Q"],
                 f"Q = v·A = {vals['v']:.6f}×{vals['A']:.4f}", "m³/s"))
             changed = True
-        if "Q" in vals and "A" in vals and "v" not in vals:
+        if not is_constant_head and "Q" in vals and "A" in vals and "v" not in vals:
             if vals["A"] > 0:
                 vals["v"] = vals["Q"] / vals["A"]
                 derivations.append(DerivedValue("v", vals["v"],
                     f"v = Q/A = {vals['Q']:.6f}/{vals['A']:.4f}", "m/s"))
                 changed = True
-        if "Q" in vals and "v" in vals and "A" not in vals:
+        if not is_constant_head and "Q" in vals and "v" in vals and "A" not in vals:
             if vals["v"] > 0:
                 vals["A"] = vals["Q"] / vals["v"]
                 derivations.append(DerivedValue("A", vals["A"],
@@ -193,10 +195,11 @@ def _solve(known: Dict[str, float], gamma_w: float) -> Tuple[dict, List[DerivedV
         if all(k in vals for k in ["a","L","A","t","h1","h2"]) and "k" not in vals:
             if vals["A"] > 0 and vals["t"] > 0 and vals["h2"] > 0:
                 ratio = vals["h1"] / vals["h2"]
-                if ratio > 0:
-                    vals["k"] = (vals["a"] * vals["L"]) / (vals["A"] * vals["t"]) * math.log(ratio)
+                if ratio > 1:
+                    a_m2 = vals["a"] * 1e-4  # cm² → m²
+                    vals["k"] = (a_m2 * vals["L"]) / (vals["A"] * vals["t"]) * math.log(ratio)
                     derivations.append(DerivedValue("k", vals["k"],
-                        f"k = a·L/(A·t)·ln(h1/h2) = {vals['a']:.4f}×{vals['L']:.4f}/({vals['A']:.4f}×{vals['t']:.1f})×ln({vals['h1']:.1f}/{vals['h2']:.1f})", "m/s"))
+                        f"k = (a×10⁻⁴)·L/(A·t)·ln(h1/h2) = ({vals['a']:.4f}×10⁻⁴)×{vals['L']:.4f}/({vals['A']:.4f}×{vals['t']:.1f})×ln({vals['h1']:.1f}/{vals['h2']:.1f})", "m/s"))
                     changed = True
 
         # ---- (7) j = gamma_w * i ----
@@ -290,12 +293,15 @@ def _solve(known: Dict[str, float], gamma_w: float) -> Tuple[dict, List[DerivedV
 
     # 精度处理
     for k in vals:
-        if k not in ("i", "e", "Fs", "i_cr"):
+        if k in ("k", "v", "Q"):
+            # 渗透系数和流速常为 10⁻⁶ 以下，固定 6 位会直接舍入为 0。
+            vals[k] = round(vals[k], 12)
+        elif k not in ("i", "e", "Fs", "i_cr"):
             vals[k] = round(vals[k], 6)
         else:
             vals[k] = round(vals[k], 4)
     for d in derivations:
-        d.value = round(d.value, 4)
+        d.value = round(d.value, 12 if d.symbol in ("k", "v", "Q") else 4)
 
     # 构建结果
     final = {}
@@ -330,6 +336,8 @@ def calculate_darcy_law(inp: DarcyLawInput) -> DarcyLawResult:
 
     if len(known) < 2:
         raise ValueError(f"至少需要输入 2 个已知参数，当前仅 {len(known)} 个")
+    if inp.h1 is not None and inp.h2 is not None and inp.h1 <= inp.h2:
+        raise ValueError("变水头试验应满足初始水头 h₁ > 终止水头 h₂")
 
     # 执行求解
     final, derivations = _solve(known, inp.gamma_w)
