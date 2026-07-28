@@ -1,6 +1,6 @@
 {
   "name": "engineering-calc",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "type": "module",
@@ -9,6 +9,7 @@
     "test:authoritative-cases": "node tests/authoritative-cases.test.mjs",
     "test:rankine": "node tests/rankine-earth-pressure.test.mjs",
     "test:foundation-bearing": "node tests/foundation-bearing.test.mjs",
+    "test:rebar-quick": "node tests/rebar-quick.test.mjs",
     "build:h5": "node scripts/build-h5.mjs"
   },
   "dependencies": {

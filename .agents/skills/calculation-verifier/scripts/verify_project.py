@@ -37,12 +37,14 @@ from calculators.rankine_earth_pressure import (  # noqa: E402
     RankineEarthPressureInput, RankineLayer, calculate_rankine_earth_pressure,
 )
 from calculators.foundation_bearing import FoundationBearingInput, calculate_foundation_bearing  # noqa: E402
+from calculators.rebar_quick import RebarQuickInput, calculate_rebar_quick  # noqa: E402
 
 
 TOOLS = [
     "bearing", "reinforcement", "section_design", "section_properties",
     "composite_section", "soil_three_phase", "darcy_law",
     "bolt_connection", "beam_forces", "rankine_earth_pressure", "foundation_bearing",
+    "rebar_quick",
 ]
 
 FIELDS = {
@@ -57,6 +59,7 @@ FIELDS = {
     "beam_forces": ["RA", "RB", "fixed_moment", "Vmax", "Mmax", "x_Mmax", "M_positive", "x_M_positive", "M_negative", "x_M_negative", "status"],
     "rankine_earth_pressure": ["total_height", "earth_resultant", "water_resultant", "total_resultant", "action_height", "earth_action_height", "water_action_height", "max_pressure"],
     "foundation_bearing": ["eta_b", "eta_d", "b_correction", "d_correction", "area", "Wx", "Wy", "Gk", "N", "fa", "width_increment", "depth_increment", "pk", "pmax", "pmin", "pmax_linear", "pmin_linear", "eccentricity", "contact_width", "pressure_mode", "full_contact", "supported", "stable", "mean_pass", "edge_pass", "overall_pass", "mean_utilization", "edge_utilization"],
+    "rebar_quick": ["operation", "diameter", "nominal_area", "unit_weight", "total_length", "total_weight", "weight_tonnes", "bar_count", "interval_count", "actual_spacing", "source_area", "required_count", "replacement_area", "area_difference", "area_change_percent", "status"],
 }
 
 
@@ -200,6 +203,22 @@ def generate_case(tool: str, rng: random.Random) -> dict:
             "Fk": fk, "Gk": gk, "Mx": rfloat(rng, -mx, mx, 5) if mx else 0,
             "My": rfloat(rng, -my, my, 5) if my else 0, "soil_category": soil,
         }
+    if tool == "rebar_quick":
+        diameters = [6, 8, 10, 12, 14, 16, 18, 20, 22, 25, 28, 32, 36, 40, 50]
+        operation = rng.choice(["quantity", "weight_to_length", "spacing", "equivalent"])
+        if operation == "quantity":
+            return {"operation": operation, "diameter": rng.choice(diameters),
+                    "bar_length": rfloat(rng, 0.1, 20, 3), "bar_count": rng.randint(1, 10000)}
+        if operation == "weight_to_length":
+            return {"operation": operation, "diameter": rng.choice(diameters),
+                    "total_weight": rfloat(rng, 0.1, 100000, 3)}
+        if operation == "spacing":
+            return {"operation": operation, "diameter": rng.choice(diameters),
+                    "layout_length": rfloat(rng, 50, 50000, 3),
+                    "max_spacing": rfloat(rng, 50, 500, 3),
+                    "bar_length": rfloat(rng, 0.1, 20, 3)}
+        return {"operation": operation, "source_diameter": rng.choice(diameters),
+                "source_count": rng.randint(1, 1000), "target_diameter": rng.choice(diameters)}
     length = rfloat(rng, 2, 20, 3)
     if rng.random() < 0.7:
         loads = [{"type": "point", "value": rfloat(rng, 1, 200, 3), "x": rfloat(rng, 0, length, 3)}]
@@ -258,6 +277,8 @@ def reference(tool: str, inp: dict) -> dict:
         return select(calculate_rankine_earth_pressure(RankineEarthPressureInput(**adapted)), tool)
     if tool == "foundation_bearing":
         return select(calculate_foundation_bearing(FoundationBearingInput(**inp)), tool)
+    if tool == "rebar_quick":
+        return select(calculate_rebar_quick(RebarQuickInput(**inp)), tool)
     adapted = dict(inp); adapted["loads"] = [BeamLoadInput(**item) for item in inp.get("loads", [])]
     return select(asdict(calculate_beam_forces(BeamForceInput(**adapted))), tool)
 
@@ -267,7 +288,10 @@ def tolerance(field: str, expected) -> tuple[float, float]:
         return 0.0, 0.0
     if field in {"rho_min", "rho_max", "rho_sv", "rho_sv_min"}:
         return 0.00011, 1e-9
-    if field in {"as_req", "as_min", "as_max", "as_prime_req", "A_sv"}:
+    if field in {"nominal_area", "source_area", "replacement_area", "area_difference"}:
+        return 0.0011, 1e-9
+    if field in {"as_req", "as_min", "as_max", "as_prime_req", "A_sv",
+                 }:
         return 0.11, 1e-9
     if field in {"x_bar", "y_bar", "i_x", "i_y", "i_z", "y_c"}:
         return 0.1000001, 1e-9

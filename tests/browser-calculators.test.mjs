@@ -9,6 +9,7 @@ import { calculateSectionProperties } from '../utils/calculators/section-propert
 import { calculateCompositeSection } from '../utils/calculators/composite-section.js'
 import { calculateBoltConnection } from '../utils/calculators/bolt-connection.js'
 import { getAlpha1, getEpsilonCu, getXiB } from '../utils/calculators/materials.js'
+import { calculateRebarQuick } from '../utils/calculators/rebar-quick.js'
 
 const close=(actual,expected,tolerance=1e-9)=>assert.ok(Math.abs(actual-expected)<=tolerance,`${actual} != ${expected}`)
 
@@ -138,4 +139,9 @@ const highStrengthBolt=calculateBoltConnection({
 close(highStrengthBolt.total_capacity,202.5,.001)
 assert.equal(highStrengthBolt.passed,false)
 
-console.log('浏览器计算核心：现有九项计算工具全部通过')
+const rebarQuick=calculateRebarQuick({
+  operation:'quantity',diameter:16,bar_length:6,bar_count:25,
+}).data
+close(rebarQuick.total_weight,237,.001)
+
+console.log('浏览器计算核心：现有计算工具全部通过')

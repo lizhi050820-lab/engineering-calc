@@ -121,6 +121,14 @@
 			}
 		},
 		{
+			"path": "pages/calculator/rebar-quick",
+			"style": {
+				"navigationBarTitleText": "钢筋工程速算",
+				"navigationBarBackgroundColor": "#123F43",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
 			"path": "pages/calculator/section-props",
 			"style": {
 				"navigationBarTitleText": "截面几何性质计算",

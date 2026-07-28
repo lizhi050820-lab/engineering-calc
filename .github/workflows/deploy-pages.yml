@@ -57,6 +57,9 @@ jobs:
       - name: Test foundation bearing
         run: pnpm run test:foundation-bearing
 
+      - name: Test rebar quick calculator
+        run: pnpm run test:rebar-quick
+
       - name: Differential calculation verification
         run: python .agents/skills/calculation-verifier/scripts/verify_project.py --cases-per-tool 500 --report verification/reports/ci-verification.md
 
