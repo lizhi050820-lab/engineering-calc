@@ -65,7 +65,7 @@
         <input class="form-input" type="digit" v-model="form.q" placeholder="无荷载填 0" />
       </view>
 
-      <view class="switch-row" @click="waterEnabled = !waterEnabled">
+      <view class="switch-row">
         <view>
           <view class="switch-title">考虑地下水</view>
           <view class="switch-desc">开启后填写地下水位和各层饱和重度</view>

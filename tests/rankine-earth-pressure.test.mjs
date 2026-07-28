@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { calculateRankineEarthPressure } from '../utils/calculators/rankine-earth-pressure.js'
 
 const close = (actual, expected, tolerance = 0.001) =>
@@ -50,5 +51,16 @@ assert.throws(() => calculateRankineEarthPressure({
   mode: 'active', water_table: 7,
   layers: [{ h: 5, phi: 30, gamma: 18, gamma_sat: 20 }]
 }), /地下水位深度/)
+
+const pageSource = readFileSync(
+  new URL('../pages/calculator/rankine-earth-pressure.vue', import.meta.url),
+  'utf8'
+)
+assert.doesNotMatch(
+  pageSource,
+  /class="switch-row"[^>]*@click=/,
+  '地下水开关外层不能再绑定点击翻转，否则会与 switch 的 change 事件重复切换'
+)
+assert.match(pageSource, /:checked="waterEnabled" @change="waterEnabled = \$event\.detail\.value"/)
 
 console.log('朗肯土压力：经典、分层、地下水、黏性土与非法输入算例全部通过')
