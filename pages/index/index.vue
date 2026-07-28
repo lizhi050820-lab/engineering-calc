@@ -5,7 +5,7 @@
       <view class="banner-kicker">ENGINEERING CALCULATOR</view>
       <view class="banner-title">土木工程计算工具箱</view>
       <view class="banner-desc">把规范公式变成清晰、可靠的计算过程</view>
-      <view class="banner-meta"><text>9 个工具</text><text>5 个专业模块</text><text>逐步推导</text></view>
+      <view class="banner-meta"><text>10 个工具</text><text>5 个专业模块</text><text>逐步推导</text></view>
     </view>
 
     <!-- 分类入口 -->
@@ -45,8 +45,8 @@
         <view class="cat-index">03</view>
         <view class="cat-info">
           <view class="cat-name">土力学计算</view>
-          <view class="cat-desc">三相指标 · 渗流计算 · 朗肯土压力</view>
-          <view class="cat-count">3 个工具</view>
+          <view class="cat-desc">三相指标 · 渗流 · 土压力 · 地基承载力</view>
+          <view class="cat-count">4 个工具</view>
         </view>
         <view class="cat-arrow">›</view>
       </view>

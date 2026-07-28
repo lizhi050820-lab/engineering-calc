@@ -58,6 +58,10 @@ from calculators.rankine_earth_pressure import (
     RankineLayer,
     calculate_rankine_earth_pressure,
 )
+from calculators.foundation_bearing import (
+    FoundationBearingInput,
+    calculate_foundation_bearing,
+)
 
 app = FastAPI(
     title="土木工程计算工具箱",
@@ -332,6 +336,24 @@ class RankineEarthPressureRequest(BaseModel):
     gamma_w: float = Field(default=9.81, gt=0, description="水的重度 (kN/m³)")
 
 
+class FoundationBearingRequest(BaseModel):
+    """GB 50007—2011 天然地基承载力快速验算请求。"""
+    b: float = Field(..., gt=0, description="基础宽度 b (m)")
+    l: float = Field(..., gt=0, description="基础长度 l (m)")
+    d: float = Field(..., ge=0, description="基础埋深 d (m)")
+    fak: float = Field(..., gt=0, description="未经宽深修正的承载力特征值 (kPa)")
+    gamma: float = Field(..., gt=0, description="基底以下土重度 (kN/m³)")
+    gamma_m: float = Field(..., gt=0, description="基底以上土加权平均重度 (kN/m³)")
+    Fk: float = Field(..., ge=0, description="标准组合竖向力 (kN)")
+    Gk: Optional[float] = Field(default=None, ge=0, description="基础及覆土重 (kN)")
+    foundation_weight_pressure: float = Field(default=20, gt=0, description="自动计算 Gk 时的单位面积重 (kPa)")
+    Mx: float = Field(default=0, description="基础底面形心处 Mx (kN·m)")
+    My: float = Field(default=0, description="基础底面形心处 My (kN·m)")
+    soil_category: str = Field(default="cohesive_firm", description="表5.2.4土类键；custom为自定义")
+    eta_b: Optional[float] = Field(default=None, ge=0, description="自定义宽度修正系数")
+    eta_d: Optional[float] = Field(default=None, ge=0, description="自定义深度修正系数")
+
+
 # =============================================================================
 # API Endpoints
 # =============================================================================
@@ -353,6 +375,7 @@ def root():
             "POST /api/calculate/bolt-connection    螺栓连接承载力计算",
             "POST /api/calculate/beam-forces        结构力学梁内力速算",
             "POST /api/calculate/rankine-earth-pressure 朗肯土压力计算",
+            "POST /api/calculate/foundation-bearing 地基承载力规范验算",
             "GET  /api/references                     材料参数参考表",
         ],
     }
@@ -414,6 +437,20 @@ def api_rankine_earth_pressure(req: RankineEarthPressureRequest):
         )
         result = calculate_rankine_earth_pressure(inp)
         return {"success": True, "data": result, "message": "朗肯土压力计算完成"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/calculate/foundation-bearing")
+def api_foundation_bearing(req: FoundationBearingRequest):
+    """GB 50007—2011 第5.2.1、5.2.2、5.2.4条快速验算。"""
+    try:
+        result = calculate_foundation_bearing(FoundationBearingInput(**req.model_dump()))
+        return {
+            "success": True,
+            "data": result,
+            "message": "地基承载力验算满足" if result["overall_pass"] else "地基承载力验算需复核",
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

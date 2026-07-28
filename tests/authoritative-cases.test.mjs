@@ -6,6 +6,7 @@ import { calculateDarcyLaw } from '../utils/calculators/darcy-law.js'
 import { calculateBoltConnection } from '../utils/calculators/bolt-connection.js'
 import { calculateBearingCapacity } from '../utils/calculators/bearing-capacity.js'
 import { calculateRankineEarthPressure } from '../utils/calculators/rankine-earth-pressure.js'
+import { calculateFoundationBearing } from '../utils/calculators/foundation-bearing.js'
 
 const cases = JSON.parse(fs.readFileSync(new URL('../verification/authoritative-cases/cases.json', import.meta.url), 'utf8'))
 const calculators = {
@@ -13,7 +14,8 @@ const calculators = {
   darcy_law: calculateDarcyLaw,
   bolt_connection: calculateBoltConnection,
   bearing: calculateBearingCapacity,
-  rankine_earth_pressure: calculateRankineEarthPressure
+  rankine_earth_pressure: calculateRankineEarthPressure,
+  foundation_bearing: calculateFoundationBearing
 }
 
 const get = (object, path) => path.split('.').reduce((value, key) => value?.[key], object)

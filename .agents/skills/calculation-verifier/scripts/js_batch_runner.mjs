@@ -9,11 +9,11 @@ if (!repoArg || !inputPath || !outputPath) {
 
 const repo = path.resolve(repoArg)
 const load = async name => import(pathToFileURL(path.join(repo, 'utils', 'calculators', name)).href)
-const [bearing, reinforcement, sectionDesign, sectionProperties, composite, soil, darcy, bolt, beam, rankine] = await Promise.all([
+const [bearing, reinforcement, sectionDesign, sectionProperties, composite, soil, darcy, bolt, beam, rankine, foundation] = await Promise.all([
   load('bearing-capacity.js'), load('reinforcement.js'), load('section-design.js'),
   load('section-properties.js'), load('composite-section.js'), load('soil-three-phase.js'),
   load('darcy-law.js'), load('bolt-connection.js'), load('beam-forces.js'),
-  load('rankine-earth-pressure.js')
+  load('rankine-earth-pressure.js'), load('foundation-bearing.js')
 ])
 
 const calculators = {
@@ -26,7 +26,8 @@ const calculators = {
   darcy_law: darcy.calculateDarcyLaw,
   bolt_connection: bolt.calculateBoltConnection,
   beam_forces: beam.calculateBeamForces,
-  rankine_earth_pressure: rankine.calculateRankineEarthPressure
+  rankine_earth_pressure: rankine.calculateRankineEarthPressure,
+  foundation_bearing: foundation.calculateFoundationBearing
 }
 
 const fields = {
@@ -39,7 +40,8 @@ const fields = {
   darcy_law: ['k', 'i', 'delta_h', 'L', 'Q', 'v', 'A', 'j', 'i_cr', 'gamma_prime', 'Gs', 'e', 'Fs'],
   bolt_connection: ['per_bolt_capacity', 'total_capacity', 'control', 'utilization', 'passed', 'details.shear_capacity', 'details.bearing_capacity', 'details.pretension'],
   beam_forces: ['RA', 'RB', 'fixed_moment', 'Vmax', 'Mmax', 'x_Mmax', 'M_positive', 'x_M_positive', 'M_negative', 'x_M_negative', 'status'],
-  rankine_earth_pressure: ['total_height', 'earth_resultant', 'water_resultant', 'total_resultant', 'action_height', 'earth_action_height', 'water_action_height', 'max_pressure']
+  rankine_earth_pressure: ['total_height', 'earth_resultant', 'water_resultant', 'total_resultant', 'action_height', 'earth_action_height', 'water_action_height', 'max_pressure'],
+  foundation_bearing: ['eta_b', 'eta_d', 'b_correction', 'd_correction', 'area', 'Wx', 'Wy', 'Gk', 'N', 'fa', 'width_increment', 'depth_increment', 'pk', 'pmax', 'pmin', 'pmax_linear', 'pmin_linear', 'eccentricity', 'contact_width', 'pressure_mode', 'full_contact', 'supported', 'stable', 'mean_pass', 'edge_pass', 'overall_pass', 'mean_utilization', 'edge_utilization']
 }
 
 function getPath(value, dotted) {

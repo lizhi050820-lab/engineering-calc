@@ -89,6 +89,14 @@
 			}
 		},
 		{
+			"path": "pages/calculator/foundation-bearing",
+			"style": {
+				"navigationBarTitleText": "地基承载力验算",
+				"navigationBarBackgroundColor": "#123F43",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
 			"path": "pages/calculator/bearing",
 			"style": {
 				"navigationBarTitleText": "正截面承载力计算",
