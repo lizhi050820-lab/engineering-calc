@@ -53,6 +53,11 @@ from calculators.darcy_law import (
 )
 from calculators.bolt_connection import BoltConnectionInput, calculate_bolt_connection
 from calculators.beam_internal_forces import BeamForceInput, calculate_beam_forces
+from calculators.rankine_earth_pressure import (
+    RankineEarthPressureInput,
+    RankineLayer,
+    calculate_rankine_earth_pressure,
+)
 
 app = FastAPI(
     title="土木工程计算工具箱",
@@ -308,6 +313,25 @@ class BeamForceRequest(BaseModel):
     fixed_end: Optional[Literal["left", "right"]] = Field(default=None, description="悬臂梁固定端方向")
 
 
+class RankineLayerRequest(BaseModel):
+    """朗肯土压力的一层土。"""
+    h: float = Field(..., gt=0, description="土层厚度 (m)")
+    gamma: float = Field(..., gt=0, description="天然重度 (kN/m³)")
+    phi: float = Field(..., ge=0, lt=45, description="内摩擦角 (°)")
+    c: float = Field(default=0, ge=0, description="黏聚力 (kPa)")
+    gamma_sat: Optional[float] = Field(default=None, gt=0, description="饱和重度 (kN/m³)")
+
+
+class RankineEarthPressureRequest(BaseModel):
+    """经典朗肯土压力计算请求。"""
+    mode: Literal["active", "passive", "at_rest"] = "active"
+    layers: List[RankineLayerRequest] = Field(..., min_length=1, max_length=8)
+    q: float = Field(default=0, ge=0, description="地面均布荷载 (kPa)")
+    water_table: Optional[float] = Field(default=None, ge=0, description="地下水位距地表深度 (m)")
+    water_method: Literal["separate", "combined"] = "separate"
+    gamma_w: float = Field(default=9.81, gt=0, description="水的重度 (kN/m³)")
+
+
 # =============================================================================
 # API Endpoints
 # =============================================================================
@@ -328,6 +352,7 @@ def root():
             "POST /api/calculate/soil-three-phase   土力学三相指标计算",
             "POST /api/calculate/bolt-connection    螺栓连接承载力计算",
             "POST /api/calculate/beam-forces        结构力学梁内力速算",
+            "POST /api/calculate/rankine-earth-pressure 朗肯土压力计算",
             "GET  /api/references                     材料参数参考表",
         ],
     }
@@ -371,6 +396,24 @@ def api_beam_forces(req: BeamForceRequest):
             },
             "message": result.message,
         }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/calculate/rankine-earth-pressure")
+def api_rankine_earth_pressure(req: RankineEarthPressureRequest):
+    """经典朗肯主动、被动和静止土压力计算。"""
+    try:
+        inp = RankineEarthPressureInput(
+            mode=req.mode,
+            layers=[RankineLayer(**layer.model_dump()) for layer in req.layers],
+            q=req.q,
+            water_table=req.water_table,
+            water_method=req.water_method,
+            gamma_w=req.gamma_w,
+        )
+        result = calculate_rankine_earth_pressure(inp)
+        return {"success": True, "data": result, "message": "朗肯土压力计算完成"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

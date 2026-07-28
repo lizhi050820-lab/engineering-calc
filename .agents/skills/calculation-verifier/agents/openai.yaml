@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Calculation Verifier"
+  short_description: "Verify engineering calculators with reproducible cases."
+  default_prompt: "Use $calculation-verifier to batch-verify engineering calculators and report reproducible failures."

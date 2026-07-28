@@ -16,6 +16,7 @@ import { calculateSectionDesign } from './calculators/section-design.js'
 import { calculateSectionProperties } from './calculators/section-properties.js'
 import { calculateCompositeSection } from './calculators/composite-section.js'
 import { calculateBoltConnection } from './calculators/bolt-connection.js'
+import { calculateRankineEarthPressure } from './calculators/rankine-earth-pressure.js'
 
 /**
  * 获取材料参数参考表（混凝土、钢筋数据）
@@ -144,4 +145,9 @@ export function calcBoltConnection(params) {
 /** 结构力学常见梁内力速算 */
 export function calcBeamForces(params) {
   return localApi(calculateBeamForces, params)
+}
+
+/** 经典朗肯主动、被动与静止土压力计算 */
+export function calcRankineEarthPressure(params) {
+  return localApi(calculateRankineEarthPressure, params)
 }

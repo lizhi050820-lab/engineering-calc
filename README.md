@@ -1,62 +1,61 @@
 # 土木工程计算工具箱
 
-微信小程序，提供土木工程结构设计常用计算功能。
+面向快速复核与学习的土木工程计算网站，采用 uni-app（Vue 3）开发，并通过 GitHub Pages 免费发布。正式网页中的计算均在浏览器本地完成，无需下载，也不依赖开发者电脑或后端服务器。
 
-## 技术栈
-
-| 层 | 技术 |
-|---|------|
-| 前端 | uni-app (Vue 3) |
-| 后端 | Python FastAPI |
-| 规范 | GB/T 50010-2010（2024年版） |
+公开地址：<https://lizhi050820-lab.github.io/engineering-calc/>
 
 ## 功能模块
 
-| 模块 | 说明 |
-|------|------|
-| **截面设计** | 正截面承载力 + 斜截面受剪承载力，一次输入全部计算 |
-| **正截面承载力** | 单筋/双筋矩形截面，校核与设计模式 |
-| **配筋计算** | 给定设计弯矩，自动计算配筋并推荐选筋方案 |
+| 分类 | 计算工具 |
+|---|---|
+| 混凝土结构设计 | 截面统一设计、正截面承载力、配筋计算 |
+| 截面几何性质 | 标准截面、组合截面 |
+| 土力学计算 | 三相比例指标、达西定律、朗肯土压力 |
+| 钢结构设计 | 螺栓连接承载力 |
+| 结构力学速算 | 梁内力与支座反力 |
 
-## 项目结构
+朗肯土压力当前支持主动、被动和静止土压力，多层土、地面均布荷载、地下水位，以及水土分算/合算。页面会给出压力分布、合力、作用点、计算步骤和适用范围。
 
+## 技术结构
+
+| 层 | 技术与用途 |
+|---|---|
+| 网站 | uni-app（Vue 3）+ Vite |
+| 网页计算核心 | `utils/calculators/` 中的 JavaScript 纯函数 |
+| 独立参考实现 | `backend/calculators/` 中的 Python 计算器 |
+| API（开发与复核） | Python FastAPI |
+| 自动验证 | 固定权威算例、Python/JavaScript 差分测试、性质测试和浏览器回归测试 |
+| 发布 | GitHub Actions + GitHub Pages |
+
+## 本地运行
+
+安装依赖后启动 H5：
+
+```powershell
+pnpm install
+pnpm run dev:h5
 ```
-├── backend/                  # Python FastAPI 后端
-│   ├── main.py               # API 应用（4个端点）
-│   ├── calculators/
-│   │   ├── bearing_capacity.py   # 正截面承载力
-│   │   ├── reinforcement.py      # 配筋计算
-│   │   └── shear_capacity.py     # 斜截面承载力
-│   └── tests/
-│       └── test_calculators.py   # 24个单元测试
-├── pages/                    # uni-app 前端页面
-│   ├── index/                # 首页
-│   └── calculator/
-│       ├── bearing.vue        # 正截面页面
-│       ├── rebar.vue          # 配筋页面
-│       └── section-design.vue # 截面设计页面
-├── utils/api.js              # API 调用封装
-├── pages.json                # 页面路由配置
-└── manifest.json             # 小程序配置
-```
 
-## 快速开始
+需要运行 FastAPI 时：
 
-### 后端
-
-```bash
+```powershell
 cd backend
-pip install -r requirements.txt
-python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+.\.venv\Scripts\python.exe -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 前端
+微信小程序仍可在 HBuilderX 中编译，微信开发者工具应打开 `unpackage/dist/dev/mp-weixin/`。
 
-用 HBuilderX 打开项目根目录，运行 → 微信开发者工具。
+## 验证
 
-### 测试
-
-```bash
+```powershell
+pnpm run test:browser-calculators
+pnpm run test:authoritative-cases
+pnpm run test:rankine
+python .agents/skills/calculation-verifier/scripts/verify_project.py --cases-per-tool 500
 cd backend
 python tests/test_calculators.py
 ```
+
+最新全量差分与性质测试为 **7400/7400 通过**，Python 后端回归测试为 **60/60 通过**。详细证据在 `verification/reports/`。
+
+> 本工具用于学习、方案比较和快速复核，不能替代具备资质的工程师审核、完整结构分析及正式施工图设计。超出页面列明的理论假定时，应改用相应规范方法或专业软件。

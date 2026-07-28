@@ -38,6 +38,12 @@ jobs:
       - name: Test browser calculators
         run: pnpm run test:browser-calculators
 
+      - name: Test authoritative cases
+        run: pnpm run test:authoritative-cases
+
+      - name: Test Rankine earth pressure
+        run: pnpm run test:rankine
+
       - name: Build H5 website
         run: pnpm run build:h5
 

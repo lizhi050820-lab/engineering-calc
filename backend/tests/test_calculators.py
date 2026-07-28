@@ -32,6 +32,36 @@ from calculators.darcy_law import DarcyLawInput, calculate_darcy_law
 from calculators.composite_section import CompositeBlock, calculate_composite_section
 from calculators.soil_three_phase import SoilThreePhaseInput, calculate_soil_three_phase
 from calculators.beam_internal_forces import BeamForceInput, BeamLoadInput, calculate_beam_forces
+from calculators.rankine_earth_pressure import (
+    RankineEarthPressureInput, RankineLayer, calculate_rankine_earth_pressure,
+)
+
+
+class TestRankineEarthPressure:
+    """朗肯土压力权威算例与性质测试。"""
+
+    def test_layered_authoritative_example(self):
+        r = calculate_rankine_earth_pressure(RankineEarthPressureInput(
+            mode='active', q=20,
+            layers=[
+                RankineLayer(h=6, phi=30, gamma=18, c=0),
+                RankineLayer(h=4, phi=35, gamma=20, c=0),
+            ],
+        ))
+        assert abs(r['total_resultant'] - 330) < 0.2
+        assert abs(r['action_height'] - 3.82) < 0.02
+        print(f"  [PASS] 两层土朗肯算例: Ea={r['total_resultant']:.3f}, x={r['action_height']:.3f}")
+
+    def test_rankine_api(self):
+        from main import app
+        from fastapi.testclient import TestClient
+        response = TestClient(app).post('/api/calculate/rankine-earth-pressure', json={
+            'mode': 'active', 'q': 0,
+            'layers': [{'h': 6, 'phi': 30, 'gamma': 18, 'c': 0}],
+        })
+        assert response.status_code == 200
+        assert abs(response.json()['data']['total_resultant'] - 108) < 0.001
+        print("  [PASS] 朗肯土压力 API")
 
 
 class TestBoltConnection:
@@ -1020,6 +1050,7 @@ if __name__ == '__main__':
     tests_section = TestSectionProperties()
     tests_bolt = TestBoltConnection()
     tests_beam = TestBeamInternalForces()
+    tests_rankine = TestRankineEarthPressure()
     tests_regression = TestRegressionFixes()
 
     all_passed = 0
@@ -1090,6 +1121,16 @@ if __name__ == '__main__':
         if name.startswith('test_'):
             try:
                 getattr(tests_beam, name)()
+                all_passed += 1
+            except Exception as e:
+                print(f"  [FAIL] {name} FAILED: {e}")
+            all_total += 1
+
+    print()
+    for name in dir(tests_rankine):
+        if name.startswith('test_'):
+            try:
+                getattr(tests_rankine, name)()
                 all_passed += 1
             except Exception as e:
                 print(f"  [FAIL] {name} FAILED: {e}")

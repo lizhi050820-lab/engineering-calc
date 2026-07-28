@@ -45,8 +45,8 @@
         <view class="cat-index">03</view>
         <view class="cat-info">
           <view class="cat-name">土力学计算</view>
-          <view class="cat-desc">三相比例指标 · 地基承载力 · 沉降计算</view>
-          <view class="cat-count">2 个工具</view>
+          <view class="cat-desc">三相指标 · 渗流计算 · 朗肯土压力</view>
+          <view class="cat-count">3 个工具</view>
         </view>
         <view class="cat-arrow">›</view>
       </view>
