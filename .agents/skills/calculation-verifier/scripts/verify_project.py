@@ -36,12 +36,13 @@ from calculators.beam_internal_forces import (  # noqa: E402
 from calculators.rankine_earth_pressure import (  # noqa: E402
     RankineEarthPressureInput, RankineLayer, calculate_rankine_earth_pressure,
 )
+from calculators.foundation_bearing import FoundationBearingInput, calculate_foundation_bearing  # noqa: E402
 
 
 TOOLS = [
     "bearing", "reinforcement", "section_design", "section_properties",
     "composite_section", "soil_three_phase", "darcy_law",
-    "bolt_connection", "beam_forces", "rankine_earth_pressure",
+    "bolt_connection", "beam_forces", "rankine_earth_pressure", "foundation_bearing",
 ]
 
 FIELDS = {
@@ -55,6 +56,7 @@ FIELDS = {
     "bolt_connection": ["per_bolt_capacity", "total_capacity", "control", "utilization", "passed", "details.shear_capacity", "details.bearing_capacity", "details.pretension"],
     "beam_forces": ["RA", "RB", "fixed_moment", "Vmax", "Mmax", "x_Mmax", "M_positive", "x_M_positive", "M_negative", "x_M_negative", "status"],
     "rankine_earth_pressure": ["total_height", "earth_resultant", "water_resultant", "total_resultant", "action_height", "earth_action_height", "water_action_height", "max_pressure"],
+    "foundation_bearing": ["eta_b", "eta_d", "b_correction", "d_correction", "area", "Wx", "Wy", "Gk", "N", "fa", "width_increment", "depth_increment", "pk", "pmax", "pmin", "pmax_linear", "pmin_linear", "eccentricity", "contact_width", "pressure_mode", "full_contact", "supported", "stable", "mean_pass", "edge_pass", "overall_pass", "mean_utilization", "edge_utilization"],
 }
 
 
@@ -165,6 +167,39 @@ def generate_case(tool: str, rng: random.Random) -> dict:
             "water_method": rng.choice(["separate", "combined"]),
             "gamma_w": rng.choice([9.81, 10.0]),
         }
+    if tool == "foundation_bearing":
+        b = rfloat(rng, 1.0, 6.5, 3)
+        length = rfloat(rng, b, 9.0, 3)
+        fk = rfloat(rng, 50, 2500, 3)
+        gk = rfloat(rng, 0, 700, 3)
+        vertical = fk + gk
+        mode = rng.choice(["axial", "uniaxial", "biaxial_full", "biaxial_separation"])
+        mx = my = 0.0
+        if mode == "uniaxial":
+            direction = rng.choice(["x", "y"])
+            dimension = length if direction == "x" else b
+            eccentricity = rfloat(rng, 0, dimension * 0.45, 5)
+            if direction == "x":
+                mx = vertical * eccentricity
+            else:
+                my = vertical * eccentricity
+        elif mode == "biaxial_full":
+            mx = vertical * length * rfloat(rng, 0.005, 0.045, 5)
+            my = vertical * b * rfloat(rng, 0.005, 0.045, 5)
+        elif mode == "biaxial_separation":
+            mx = vertical * length * rfloat(rng, 0.09, 0.18, 5)
+            my = vertical * b * rfloat(rng, 0.09, 0.18, 5)
+        soil = rng.choice([
+            "silt_muck_fill_soft_clay", "red_clay_wet", "red_clay_dry",
+            "silt_clay_ge10", "silt_clay_lt10", "cohesive_firm", "fine_sand", "coarse_soil",
+        ])
+        return {
+            "b": b, "l": length, "d": rfloat(rng, 0.1, 5, 3),
+            "fak": rfloat(rng, 60, 500, 3),
+            "gamma": rfloat(rng, 7, 23, 3), "gamma_m": rfloat(rng, 7, 23, 3),
+            "Fk": fk, "Gk": gk, "Mx": rfloat(rng, -mx, mx, 5) if mx else 0,
+            "My": rfloat(rng, -my, my, 5) if my else 0, "soil_category": soil,
+        }
     length = rfloat(rng, 2, 20, 3)
     if rng.random() < 0.7:
         loads = [{"type": "point", "value": rfloat(rng, 1, 200, 3), "x": rfloat(rng, 0, length, 3)}]
@@ -221,6 +256,8 @@ def reference(tool: str, inp: dict) -> dict:
         adapted = dict(inp)
         adapted["layers"] = [RankineLayer(**item) for item in inp["layers"]]
         return select(calculate_rankine_earth_pressure(RankineEarthPressureInput(**adapted)), tool)
+    if tool == "foundation_bearing":
+        return select(calculate_foundation_bearing(FoundationBearingInput(**inp)), tool)
     adapted = dict(inp); adapted["loads"] = [BeamLoadInput(**item) for item in inp.get("loads", [])]
     return select(asdict(calculate_beam_forces(BeamForceInput(**adapted))), tool)
 

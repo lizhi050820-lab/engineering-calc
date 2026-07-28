@@ -35,6 +35,37 @@ from calculators.beam_internal_forces import BeamForceInput, BeamLoadInput, calc
 from calculators.rankine_earth_pressure import (
     RankineEarthPressureInput, RankineLayer, calculate_rankine_earth_pressure,
 )
+from calculators.foundation_bearing import FoundationBearingInput, calculate_foundation_bearing
+
+
+class TestFoundationBearing:
+    """GB 50007 地基承载力公开算例与 API。"""
+
+    def test_published_independent_foundation(self):
+        r = calculate_foundation_bearing(FoundationBearingInput(
+            b=1.7, l=1.7, d=1.6, fak=180,
+            soil_category='cohesive_firm', gamma=20, gamma_m=20,
+            Fk=72.8, Gk=69.36, Mx=4.78, My=28.81,
+        ))
+        assert abs(r['fa'] - 215.2) < 0.001
+        assert abs(r['pk'] - 49.19) < 0.01
+        assert abs(r['pmax'] - 90.21) < 0.03
+        assert abs(r['pmin'] - 8.17) < 0.03
+        assert r['overall_pass'] is True
+        print(f"  [PASS] 地基承载力公开算例: fa={r['fa']:.3f}, pmax={r['pmax']:.3f}")
+
+    def test_foundation_bearing_api(self):
+        from main import app
+        from fastapi.testclient import TestClient
+        response = TestClient(app).post('/api/calculate/foundation-bearing', json={
+            'b': 2, 'l': 3, 'd': 0.4, 'fak': 150,
+            'soil_category': 'cohesive_firm', 'gamma': 18, 'gamma_m': 18,
+            'Fk': 600, 'foundation_weight_pressure': 20,
+        })
+        assert response.status_code == 200
+        assert response.json()['data']['fa'] == 150
+        assert response.json()['data']['pk'] == 120
+        print("  [PASS] 地基承载力 API")
 
 
 class TestRankineEarthPressure:
@@ -1051,6 +1082,7 @@ if __name__ == '__main__':
     tests_bolt = TestBoltConnection()
     tests_beam = TestBeamInternalForces()
     tests_rankine = TestRankineEarthPressure()
+    tests_foundation = TestFoundationBearing()
     tests_regression = TestRegressionFixes()
 
     all_passed = 0
@@ -1131,6 +1163,16 @@ if __name__ == '__main__':
         if name.startswith('test_'):
             try:
                 getattr(tests_rankine, name)()
+                all_passed += 1
+            except Exception as e:
+                print(f"  [FAIL] {name} FAILED: {e}")
+            all_total += 1
+
+    print()
+    for name in dir(tests_foundation):
+        if name.startswith('test_'):
+            try:
+                getattr(tests_foundation, name)()
                 all_passed += 1
             except Exception as e:
                 print(f"  [FAIL] {name} FAILED: {e}")

@@ -6,10 +6,11 @@ const [repoArg, outputPath, countArg = '200', seedArg = '20260719'] = process.ar
 const repo = path.resolve(repoArg)
 const count = Number(countArg), seed = Number(seedArg)
 const load = async name => import(pathToFileURL(path.join(repo, 'utils', 'calculators', name)).href)
-const [section, composite, soil, darcy, bolt, beam, rebar, bearing, design, shear] = await Promise.all([
+const [section, composite, soil, darcy, bolt, beam, rebar, bearing, design, shear, foundation] = await Promise.all([
   load('section-properties.js'), load('composite-section.js'), load('soil-three-phase.js'),
   load('darcy-law.js'), load('bolt-connection.js'), load('beam-forces.js'),
-  load('reinforcement.js'), load('bearing-capacity.js'), load('section-design.js'), load('shear-capacity.js')
+  load('reinforcement.js'), load('bearing-capacity.js'), load('section-design.js'), load('shear-capacity.js'),
+  load('foundation-bearing.js')
 ])
 
 let state = seed >>> 0
@@ -93,6 +94,22 @@ for (let index = 0; index < count; index += 1) {
   const standaloneFlex = bearing.calculateBearingCapacity(designInput).data
   const standaloneShear = shear.calculateShearCapacity(designInput).data
   check('统一设计等于独立计算', designInput, unified.flexural.mu === standaloneFlex.mu && unified.shear.V_cs === standaloneShear.V_cs, { flexural: unified.flexural.mu, shear: unified.shear.V_cs }, { flexural: standaloneFlex.mu, shear: standaloneShear.V_cs })
+
+  const foundationInput = {
+    b: between(1.2, 5), l: between(5, 8), d: between(0.2, 3), fak: between(80, 350),
+    gamma: between(8, 22), gamma_m: between(8, 22), soil_category: 'cohesive_firm',
+    Fk: between(100, 1200), Gk: between(20, 300), Mx: 0, My: 0
+  }
+  const foundation1 = foundation.calculateFoundationBearing(foundationInput).data
+  const loadIncrease = between(10, 500)
+  const foundation2 = foundation.calculateFoundationBearing({ ...foundationInput, Fk: foundationInput.Fk + loadIncrease }).data
+  const expectedPressureIncrease = loadIncrease / (foundationInput.b * foundationInput.l)
+  check('地基平均压力随竖向力线性增加', { ...foundationInput, loadIncrease },
+    close(foundation2.pk - foundation1.pk, expectedPressureIncrease, 0.0011),
+    foundation2.pk - foundation1.pk, expectedPressureIncrease)
+  check('轴心基础四角压力相等', foundationInput,
+    Object.values(foundation1.corners).every(value => close(value, foundation1.pk, 0.0011)),
+    foundation1.corners, foundation1.pk)
 }
 
 fs.writeFileSync(outputPath, JSON.stringify({ total, passed, failures }))

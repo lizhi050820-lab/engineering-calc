@@ -37,6 +37,18 @@
         </view>
         <view class="tool-arrow">›</view>
       </view>
+
+      <!-- 地基承载力 -->
+      <view class="tool-card" @click="goTo('/pages/calculator/foundation-bearing')">
+        <view class="tool-icon-wrap bg-earth">
+          <text class="tool-icon">fₐ</text>
+        </view>
+        <view class="tool-info">
+          <view class="tool-name">地基承载力规范验算</view>
+          <view class="tool-desc">宽深修正、偏心压力、基底脱空与承载力判断</view>
+        </view>
+        <view class="tool-arrow">›</view>
+      </view>
     </view>
 
     <view class="soon-notice">更多土力学计算工具开发中…</view>

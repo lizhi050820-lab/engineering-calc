@@ -17,6 +17,7 @@ import { calculateSectionProperties } from './calculators/section-properties.js'
 import { calculateCompositeSection } from './calculators/composite-section.js'
 import { calculateBoltConnection } from './calculators/bolt-connection.js'
 import { calculateRankineEarthPressure } from './calculators/rankine-earth-pressure.js'
+import { calculateFoundationBearing } from './calculators/foundation-bearing.js'
 
 /**
  * 获取材料参数参考表（混凝土、钢筋数据）
@@ -150,4 +151,9 @@ export function calcBeamForces(params) {
 /** 经典朗肯主动、被动与静止土压力计算 */
 export function calcRankineEarthPressure(params) {
   return localApi(calculateRankineEarthPressure, params)
+}
+
+/** GB 50007 天然地基承载力与矩形基础底面压力验算 */
+export function calcFoundationBearing(params) {
+  return localApi(calculateFoundationBearing, params)
 }

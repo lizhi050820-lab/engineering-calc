@@ -102,6 +102,32 @@
     "note": "课件给出 Ka1=0.33、Ka2=0.27、Ea=330 kN/m、合力作用点距墙底3.82m。"
   },
   {
+    "id": "foundation-bearing-jsviat-node5",
+    "level": "B",
+    "status": "gate",
+    "tool": "foundation_bearing",
+    "title": "矩形独立基础双向偏心地基承载力验算",
+    "source": {
+      "organization": "江苏建筑职业技术学院",
+      "location": "《独基计算_节点5》，PDF第6～7页",
+      "url": "https://tmxy.jsviat.edu.cn/_upload/article/files/b6/59/e3d25ec3438f982abb81134db1c9/8de825ea-8b71-440d-89ac-fae8b0132e34.pdf"
+    },
+    "input": {
+      "b": 1.7, "l": 1.7, "d": 1.6, "fak": 180,
+      "soil_category": "cohesive_firm", "gamma": 20, "gamma_m": 20,
+      "Fk": 72.8, "Gk": 69.36, "Mx": 4.78, "My": 28.81
+    },
+    "expected": {
+      "fa": 215.2, "pk": 49.19, "pmax": 90.21, "pmin": 8.17,
+      "mean_pass": true, "edge_pass": true, "overall_pass": true
+    },
+    "tolerance": {
+      "fa": 0.001, "pk": 0.01, "pmax": 0.03, "pmin": 0.03,
+      "mean_pass": 0, "edge_pass": 0, "overall_pass": 0
+    },
+    "note": "公开计算书给出 ηb=0.30、ηd=1.60、fa=215.20kPa、pk=49.19kPa、pkmax=90.21kPa、pkmin=8.17kPa。"
+  },
+  {
     "id": "symmetric-double-rebar-journal-example-2a",
     "level": "A",
     "status": "review",
