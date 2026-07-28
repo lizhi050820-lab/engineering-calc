@@ -62,6 +62,7 @@ from calculators.foundation_bearing import (
     FoundationBearingInput,
     calculate_foundation_bearing,
 )
+from calculators.rebar_quick import RebarQuickInput, calculate_rebar_quick
 
 app = FastAPI(
     title="土木工程计算工具箱",
@@ -354,6 +355,20 @@ class FoundationBearingRequest(BaseModel):
     eta_d: Optional[float] = Field(default=None, ge=0, description="自定义深度修正系数")
 
 
+class RebarQuickRequest(BaseModel):
+    """GB 1499—2024 钢筋工程快速互算请求。"""
+    operation: Literal["quantity", "weight_to_length", "spacing", "equivalent"] = "quantity"
+    diameter: Optional[float] = Field(default=None, gt=0, description="公称直径 (mm)")
+    bar_length: Optional[float] = Field(default=None, gt=0, description="单根长度 (m)")
+    bar_count: Optional[int] = Field(default=None, gt=0, description="钢筋根数")
+    total_weight: Optional[float] = Field(default=None, gt=0, description="总重量 (kg)")
+    layout_length: Optional[float] = Field(default=None, gt=0, description="首末筋中心布置长度 (mm)")
+    max_spacing: Optional[float] = Field(default=None, gt=0, description="最大允许间距 (mm)")
+    source_diameter: Optional[float] = Field(default=None, gt=0, description="原钢筋直径 (mm)")
+    source_count: Optional[int] = Field(default=None, gt=0, description="原钢筋根数")
+    target_diameter: Optional[float] = Field(default=None, gt=0, description="替换钢筋直径 (mm)")
+
+
 # =============================================================================
 # API Endpoints
 # =============================================================================
@@ -376,6 +391,7 @@ def root():
             "POST /api/calculate/beam-forces        结构力学梁内力速算",
             "POST /api/calculate/rankine-earth-pressure 朗肯土压力计算",
             "POST /api/calculate/foundation-bearing 地基承载力规范验算",
+            "POST /api/calculate/rebar-quick       钢筋工程速算",
             "GET  /api/references                     材料参数参考表",
         ],
     }
@@ -451,6 +467,16 @@ def api_foundation_bearing(req: FoundationBearingRequest):
             "data": result,
             "message": "地基承载力验算满足" if result["overall_pass"] else "地基承载力验算需复核",
         }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/calculate/rebar-quick")
+def api_rebar_quick(req: RebarQuickRequest):
+    """钢筋理论重量、间距根数和等面积代换。"""
+    try:
+        result = calculate_rebar_quick(RebarQuickInput(**req.model_dump()))
+        return {"success": True, "data": result, "message": "钢筋工程速算完成"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -6,11 +6,11 @@ const [repoArg, outputPath, countArg = '200', seedArg = '20260719'] = process.ar
 const repo = path.resolve(repoArg)
 const count = Number(countArg), seed = Number(seedArg)
 const load = async name => import(pathToFileURL(path.join(repo, 'utils', 'calculators', name)).href)
-const [section, composite, soil, darcy, bolt, beam, rebar, bearing, design, shear, foundation] = await Promise.all([
+const [section, composite, soil, darcy, bolt, beam, rebar, bearing, design, shear, foundation, rebarQuick] = await Promise.all([
   load('section-properties.js'), load('composite-section.js'), load('soil-three-phase.js'),
   load('darcy-law.js'), load('bolt-connection.js'), load('beam-forces.js'),
   load('reinforcement.js'), load('bearing-capacity.js'), load('section-design.js'), load('shear-capacity.js'),
-  load('foundation-bearing.js')
+  load('foundation-bearing.js'), load('rebar-quick.js')
 ])
 
 let state = seed >>> 0
@@ -110,6 +110,38 @@ for (let index = 0; index < count; index += 1) {
   check('轴心基础四角压力相等', foundationInput,
     Object.values(foundation1.corners).every(value => close(value, foundation1.pk, 0.0011)),
     foundation1.corners, foundation1.pk)
+
+  const quickDiameter = [8, 10, 12, 14, 16, 18, 20, 22, 25, 28, 32][Math.floor(random() * 11)]
+  const quickLength = between(0.5, 18), quickCount = 1 + Math.floor(random() * 100)
+  const quick1 = rebarQuick.calculateRebarQuick({
+    operation: 'quantity', diameter: quickDiameter, bar_length: quickLength, bar_count: quickCount
+  }).data
+  const quickFactor = 2 + Math.floor(random() * 5)
+  const quick2 = rebarQuick.calculateRebarQuick({
+    operation: 'quantity', diameter: quickDiameter, bar_length: quickLength, bar_count: quickCount * quickFactor
+  }).data
+  check('钢筋重量与根数线性', { quickDiameter, quickLength, quickCount, quickFactor },
+    close(quick2.total_weight, quick1.total_weight * quickFactor, 0.0011 + quickFactor * 0.0005),
+    quick2.total_weight, quick1.total_weight * quickFactor)
+
+  const layoutLength = between(500, 30000), maxSpacing = between(80, 400)
+  const layout = rebarQuick.calculateRebarQuick({
+    operation: 'spacing', diameter: quickDiameter, layout_length: layoutLength,
+    max_spacing: maxSpacing, bar_length: quickLength
+  }).data
+  check('排布实际间距不超过允许最大值', { layoutLength, maxSpacing },
+    layout.actual_spacing <= maxSpacing + 0.0011, layout.actual_spacing, maxSpacing)
+
+  const sourceDiameter = [12, 14, 16, 18, 20, 22, 25, 28][Math.floor(random() * 8)]
+  const targetDiameter = [12, 14, 16, 18, 20, 22, 25, 28][Math.floor(random() * 8)]
+  const sourceCount = 1 + Math.floor(random() * 30)
+  const replacement = rebarQuick.calculateRebarQuick({
+    operation: 'equivalent', source_diameter: sourceDiameter,
+    source_count: sourceCount, target_diameter: targetDiameter
+  }).data
+  check('等面积代换后面积不小于原面积', { sourceDiameter, sourceCount, targetDiameter },
+    replacement.replacement_area + 0.11 >= replacement.source_area,
+    replacement.replacement_area, replacement.source_area)
 }
 
 fs.writeFileSync(outputPath, JSON.stringify({ total, passed, failures }))

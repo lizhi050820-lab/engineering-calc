@@ -36,6 +36,46 @@ from calculators.rankine_earth_pressure import (
     RankineEarthPressureInput, RankineLayer, calculate_rankine_earth_pressure,
 )
 from calculators.foundation_bearing import FoundationBearingInput, calculate_foundation_bearing
+from calculators.rebar_quick import RebarQuickInput, calculate_rebar_quick
+
+
+class TestRebarQuick:
+    """GB 1499—2024 表2钢筋理论重量与互算。"""
+
+    def test_phi16_published_table_value(self):
+        r = calculate_rebar_quick(RebarQuickInput(
+            operation='quantity', diameter=16, bar_length=6, bar_count=25,
+        ))
+        assert r['nominal_area'] == 201.1
+        assert r['unit_weight'] == 1.58
+        assert r['total_length'] == 150
+        assert r['total_weight'] == 237
+
+    def test_spacing_rounds_intervals_up(self):
+        r = calculate_rebar_quick(RebarQuickInput(
+            operation='spacing', diameter=16, layout_length=5100,
+            max_spacing=200, bar_length=6,
+        ))
+        assert r['interval_count'] == 26
+        assert r['bar_count'] == 27
+        assert r['actual_spacing'] <= 200
+
+    def test_equivalent_area_never_decreases(self):
+        r = calculate_rebar_quick(RebarQuickInput(
+            operation='equivalent', source_diameter=20,
+            source_count=4, target_diameter=18,
+        ))
+        assert r['required_count'] == 5
+        assert r['replacement_area'] >= r['source_area']
+
+    def test_rebar_quick_api(self):
+        from main import app
+        from fastapi.testclient import TestClient
+        response = TestClient(app).post('/api/calculate/rebar-quick', json={
+            'operation': 'weight_to_length', 'diameter': 16, 'total_weight': 158,
+        })
+        assert response.status_code == 200
+        assert response.json()['data']['total_length'] == 100
 
 
 class TestFoundationBearing:
@@ -1083,6 +1123,7 @@ if __name__ == '__main__':
     tests_beam = TestBeamInternalForces()
     tests_rankine = TestRankineEarthPressure()
     tests_foundation = TestFoundationBearing()
+    tests_rebar_quick = TestRebarQuick()
     tests_regression = TestRegressionFixes()
 
     all_passed = 0
@@ -1173,6 +1214,16 @@ if __name__ == '__main__':
         if name.startswith('test_'):
             try:
                 getattr(tests_foundation, name)()
+                all_passed += 1
+            except Exception as e:
+                print(f"  [FAIL] {name} FAILED: {e}")
+            all_total += 1
+
+    print()
+    for name in dir(tests_rebar_quick):
+        if name.startswith('test_'):
+            try:
+                getattr(tests_rebar_quick, name)()
                 all_passed += 1
             except Exception as e:
                 print(f"  [FAIL] {name} FAILED: {e}")

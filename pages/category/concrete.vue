@@ -37,6 +37,18 @@
         </view>
         <view class="tool-arrow">›</view>
       </view>
+
+      <!-- 钢筋工程速算 -->
+      <view class="tool-card" @click="goTo('/pages/calculator/rebar-quick')">
+        <view class="tool-icon-wrap bg-orange">
+          <text class="tool-icon">KG</text>
+        </view>
+        <view class="tool-info">
+          <view class="tool-name">钢筋工程速算</view>
+          <view class="tool-desc">理论重量、间距根数与等面积代换</view>
+        </view>
+        <view class="tool-arrow">›</view>
+      </view>
     </view>
 
     <view style="height: 40rpx;"></view>

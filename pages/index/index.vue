@@ -5,7 +5,7 @@
       <view class="banner-kicker">ENGINEERING CALCULATOR</view>
       <view class="banner-title">土木工程计算工具箱</view>
       <view class="banner-desc">把规范公式变成清晰、可靠的计算过程</view>
-      <view class="banner-meta"><text>10 个工具</text><text>5 个专业模块</text><text>逐步推导</text></view>
+      <view class="banner-meta"><text>11 个工具</text><text>5 个专业模块</text><text>逐步推导</text></view>
     </view>
 
     <!-- 分类入口 -->
@@ -18,8 +18,8 @@
         <view class="cat-index">01</view>
         <view class="cat-info">
           <view class="cat-name">混凝土结构设计</view>
-          <view class="cat-desc">截面设计 · 正截面承载力 · 配筋计算</view>
-          <view class="cat-count">3 个工具</view>
+          <view class="cat-desc">截面设计 · 配筋计算 · 钢筋工程速算</view>
+          <view class="cat-count">4 个工具</view>
         </view>
         <view class="cat-arrow">›</view>
       </view>
@@ -79,7 +79,7 @@
     </view>
 
     <!-- 版本信息 -->
-    <view class="version">v0.3.0 · 浏览器本地计算</view>
+    <view class="version">v0.4.0 · 浏览器本地计算</view>
   </view>
 </template>
 

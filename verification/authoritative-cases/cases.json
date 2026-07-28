@@ -128,6 +128,37 @@
     "note": "公开计算书给出 ηb=0.30、ηd=1.60、fa=215.20kPa、pk=49.19kPa、pkmax=90.21kPa、pkmin=8.17kPa。"
   },
   {
+    "id": "rebar-gb1499-2024-table2-phi16",
+    "level": "A",
+    "status": "gate",
+    "tool": "rebar_quick",
+    "title": "Φ16钢筋理论重量用量计算",
+    "source": {
+      "organization": "国家市场监督管理总局、国家标准化管理委员会",
+      "location": "GB 1499.2—2024 第5.2条、表2",
+      "url": "https://std.samr.gov.cn/gb/search/gbDetailedCNF?id=1BD5B9878E5A2FCEE06397BE0A0A10CC"
+    },
+    "input": {
+      "operation": "quantity",
+      "diameter": 16,
+      "bar_length": 6,
+      "bar_count": 25
+    },
+    "expected": {
+      "nominal_area": 201.1,
+      "unit_weight": 1.58,
+      "total_length": 150,
+      "total_weight": 237
+    },
+    "tolerance": {
+      "nominal_area": 0.001,
+      "unit_weight": 0.001,
+      "total_length": 0.001,
+      "total_weight": 0.001
+    },
+    "note": "表2规定Φ16公称横截面面积201.1mm²、理论单位重量1.58kg/m；25根、每根6m的理论总重量为1.58×25×6=237kg。"
+  },
+  {
     "id": "symmetric-double-rebar-journal-example-2a",
     "level": "A",
     "status": "review",
