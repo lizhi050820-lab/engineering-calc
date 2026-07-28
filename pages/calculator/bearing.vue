@@ -62,6 +62,10 @@
         <view class="type-btn" :class="{ active: asType === 'single' }" @click="asType = 'single'">单筋截面</view>
         <view class="type-btn" :class="{ active: asType === 'double' }" @click="asType = 'double'">双筋截面</view>
       </view>
+      <view v-if="asType === 'double'" class="method-warning">
+        对称双筋截面在受压钢筋未屈服时，不同计算方法可能存在差异。本工具当前按 GB/T 50010
+        常用简化方法计算，正式设计请结合应变协调条件专项复核。
+      </view>
     </view>
 
     <!-- ========== 保护层 ========== -->
@@ -310,6 +314,7 @@ export default {
 .type-toggle { display: flex; background: #E5E9E6; border-radius: 14rpx; padding: 5rpx; }
 .type-btn { flex: 1; text-align: center; padding: 20rpx 0; font-size: 28rpx; color: #666; border-radius: 8rpx; }
 .type-btn.active { background: #14575B; color: #fff; font-weight: 600; }
+.method-warning { margin-top:18rpx;padding:18rpx 20rpx;border-radius:14rpx;background:#FFF3E8;color:#8A4B24;font-size:23rpx;line-height:1.65; }
 
 /* ========== 结果 ========== */
 .calc-hero { text-align: center; padding: 16rpx 0 24rpx; }

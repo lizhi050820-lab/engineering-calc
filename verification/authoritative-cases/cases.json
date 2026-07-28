@@ -1,0 +1,140 @@
+[
+  {
+    "id": "soil-three-phase-aust-example",
+    "level": "B",
+    "status": "gate",
+    "tool": "soil_three_phase",
+    "title": "原状土三相指标换算",
+    "source": {
+      "organization": "安徽理工大学精品课程《土质学与土力学》",
+      "location": "第二章，PDF 第5–6页",
+      "url": "https://jpkc.gdcvi.edu.cn/skills/portal/blob?key=15762299"
+    },
+    "input": { "rho": 1.67, "w": 0.129, "Gs": 2.67 },
+    "expected": { "e": 0.805, "n": 0.446, "Sr": 0.426 },
+    "tolerance": { "e": 0.001, "n": 0.001, "Sr": 0.002 },
+    "note": "课件解答在中间量取两位小数后得 Sr=42.6%，用原始输入直接计算约为42.78%。"
+  },
+  {
+    "id": "darcy-constant-head-classic-example",
+    "level": "B",
+    "status": "gate",
+    "tool": "darcy_law",
+    "title": "常水头渗透试验透水量",
+    "source": {
+      "organization": "《土的渗透性及渗流》教学课件",
+      "location": "例题2.1",
+      "url": "https://www.pptku.net/doc/2b5722123.html"
+    },
+    "input": { "k": 0.00025, "delta_h": 0.45, "L": 0.25, "A": 0.012, "t": 10 },
+    "expected": { "i": 1.8, "v": 0.00045, "Q": 0.0000054, "volume_10s": 0.000054 },
+    "tolerance": { "i": 1e-12, "v": 1e-12, "Q": 1e-12, "volume_10s": 1e-12 },
+    "note": "原题单位为k=2.5×10⁻² cm/s、h=45 cm、L=25 cm、A=120 cm²，10 s透水量为54 cm³。"
+  },
+  {
+    "id": "ordinary-bolt-textbook-example",
+    "level": "B",
+    "status": "gate",
+    "tool": "bolt_connection",
+    "title": "M20 C级普通螺栓双盖板拼接",
+    "source": {
+      "organization": "《普通螺栓的抗剪连接》教学资料",
+      "location": "例题1，PDF 第5页",
+      "url": "https://fztr.file.gkfz.net/pdf/a051f733dfc077d4bb3d0858c9ea5e92.pdf"
+    },
+    "input": {
+      "bolt_type": "ordinary", "diameter": 20, "bolt_count": 9,
+      "shear_planes": 2, "bolt_grade": "4.6", "steel_grade": "Q235",
+      "connected_thickness": 12, "load": 650
+    },
+    "expected": {
+      "details.shear_capacity": 87.92, "details.bearing_capacity": 73.2,
+      "per_bolt_capacity": 73.2, "total_capacity": 658.8, "passed": true
+    },
+    "tolerance": { "details.shear_capacity": 0.05, "details.bearing_capacity": 0.001, "per_bolt_capacity": 0.001, "total_capacity": 0.001 },
+    "note": "资料用3.14近似π，程序使用高精度π，因此抗剪值允许0.05 kN差异。"
+  },
+  {
+    "id": "high-strength-bolt-gb50017-clause",
+    "level": "A",
+    "status": "gate",
+    "tool": "bolt_connection",
+    "title": "10.9级M20高强螺栓抗滑移承载力条文校核",
+    "source": {
+      "organization": "《钢结构设计标准》GB 50017—2017",
+      "location": "第11.4.2条、表11.4.2-2",
+      "url": "https://www.steelbuildingtech.com/cdn/https/www.steelbuildingtech.com/Content/upload/pdf/2020739979/GB-50017-2017-Standard-for-design-of-steel-structures-explaintion-20180307.pdf"
+    },
+    "input": {
+      "bolt_type": "high_strength", "diameter": 20, "bolt_count": 1,
+      "shear_planes": 1, "bolt_grade": "10.9", "steel_grade": "Q355",
+      "connected_thickness": 10, "slip_coefficient": 0.45,
+      "friction_surfaces": 2, "hole_type": "standard"
+    },
+    "expected": { "details.pretension": 155, "per_bolt_capacity": 125.55, "total_capacity": 125.55 },
+    "tolerance": { "details.pretension": 0.001, "per_bolt_capacity": 0.001, "total_capacity": 0.001 },
+    "note": "按 Nᵇᵥ=0.9nₑμP，取nₑ=2、μ=0.45、P=155 kN。"
+  },
+  {
+    "id": "rankine-layered-whut-example-2",
+    "level": "A",
+    "status": "gate",
+    "tool": "rankine_earth_pressure",
+    "title": "两层砂土朗肯主动土压力",
+    "source": {
+      "organization": "武汉理工大学《土压力》教学课件",
+      "location": "第七章，例题2",
+      "url": "https://jxpt.whut.edu.cn/meol/analytics/resPdfShow.do%3Bjsessionid%3D6C23D23C47AC664576A8E49B5D7CC262?lid=5921&resId=122108"
+    },
+    "input": {
+      "mode": "active",
+      "q": 20,
+      "water_table": null,
+      "water_method": "separate",
+      "gamma_w": 9.81,
+      "layers": [
+        { "h": 6, "phi": 30, "gamma": 18, "gamma_sat": 18, "c": 0 },
+        { "h": 4, "phi": 35, "gamma": 20, "gamma_sat": 20, "c": 0 }
+      ]
+    },
+    "expected": { "total_resultant": 330, "action_height": 3.82 },
+    "tolerance": { "total_resultant": 0.2, "action_height": 0.02 },
+    "note": "课件给出 Ka1=0.33、Ka2=0.27、Ea=330 kN/m、合力作用点距墙底3.82m。"
+  },
+  {
+    "id": "symmetric-double-rebar-journal-example-2a",
+    "level": "A",
+    "status": "review",
+    "tool": "bearing",
+    "title": "对称双筋梁3Φ25承载力研究对照",
+    "source": {
+      "organization": "《长安大学学报（自然科学版）》",
+      "location": "郭军庆等，《混凝土对称配筋梁的抗弯承载力分析与计算》，例2、表2",
+      "url": "https://zzszrb.chd.edu.cn/Upload/PaperUpLoad/a00c0fa5-8344-479a-97cc-7631e027ca96.pdf"
+    },
+    "input": {
+      "b": 250, "h": 500, "concrete_grade": "C30", "rebar_grade": "HRB400",
+      "a_s": 35, "a_s_prime": 35, "as_type": "double", "as_given": 1473, "as_prime_given": 1473
+    },
+    "published_expected": { "research_method_mu": 224.20, "conventional_double_rebar_mu": 228.02 },
+    "note": "程序当前输出228.020 kN·m，与论文列出的传统双筋梁法一致；论文修正方法为224.20 kN·m，差异1.70%。此项不直接判程序错误，但必须在上线前做工程方法选择。"
+  },
+  {
+    "id": "symmetric-double-rebar-journal-example-2b",
+    "level": "A",
+    "status": "review",
+    "tool": "bearing",
+    "title": "对称双筋梁5Φ25承载力研究对照",
+    "source": {
+      "organization": "《长安大学学报（自然科学版）》",
+      "location": "郭军庆等，《混凝土对称配筋梁的抗弯承载力分析与计算》，例2、表2",
+      "url": "https://zzszrb.chd.edu.cn/Upload/PaperUpLoad/a00c0fa5-8344-479a-97cc-7631e027ca96.pdf"
+    },
+    "input": {
+      "b": 250, "h": 500, "concrete_grade": "C30", "rebar_grade": "HRB400",
+      "a_s": 60, "a_s_prime": 60, "as_type": "double", "as_given": 2454, "as_prime_given": 2454
+    },
+    "published_expected": { "research_method_mu": 309.99, "conventional_double_rebar_mu": 335.71 },
+    "note": "程序当前输出335.707 kN·m，与论文列出的传统双筋梁法一致；论文修正方法为309.99 kN·m，差异8.30%。"
+  }
+]

@@ -62,6 +62,9 @@
         <view class="type-btn" :class="{ active: form.as_type === 'single' }" @click="form.as_type = 'single'">单筋截面</view>
         <view class="type-btn" :class="{ active: form.as_type === 'double' }" @click="form.as_type = 'double'">双筋截面</view>
       </view>
+      <view v-if="form.as_type === 'double'" class="method-warning">
+        对称双筋且受压钢筋未屈服时，简化法可能偏大；正式设计应补充应变协调复核。
+      </view>
       <view class="grid-2" style="margin-top: 20rpx;">
         <view class="form-group">
           <text class="form-label">受拉区 aₛ (mm)</text>
@@ -424,6 +427,7 @@ export default {
 .type-toggle { display: flex; background: #E5E9E6; border-radius: 14rpx; padding: 5rpx; }
 .type-btn { flex: 1; text-align: center; padding: 20rpx 0; font-size: 28rpx; color: #666; border-radius: 8rpx; }
 .type-btn.active { background: #14575B; color: #fff; font-weight: 600; }
+.method-warning { margin-top:18rpx;padding:18rpx 20rpx;border-radius:14rpx;background:#FFF3E8;color:#8A4B24;font-size:23rpx;line-height:1.65; }
 
 /* ========== 结果 ========== */
 .calc-hero { text-align: center; padding: 16rpx 0 24rpx; }

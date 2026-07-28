@@ -25,6 +25,18 @@
         </view>
         <view class="tool-arrow">›</view>
       </view>
+
+      <!-- 朗肯土压力 -->
+      <view class="tool-card" @click="goTo('/pages/calculator/rankine-earth-pressure')">
+        <view class="tool-icon-wrap bg-earth">
+          <text class="tool-icon">Ea</text>
+        </view>
+        <view class="tool-info">
+          <view class="tool-name">朗肯土压力计算</view>
+          <view class="tool-desc">主动、被动、静止土压力，分层土与地下水</view>
+        </view>
+        <view class="tool-arrow">›</view>
+      </view>
     </view>
 
     <view class="soon-notice">更多土力学计算工具开发中…</view>
@@ -56,7 +68,7 @@ export default {
   display: flex; align-items: center; justify-content: center;
   margin-right: 24rpx; flex-shrink: 0;
 }
-.bg-brown,.bg-blue2 { background: #E0EFED; }
+.bg-brown,.bg-blue2,.bg-earth { background: #E0EFED; }
 .tool-icon { font-size: 24rpx;font-weight:800;color:#14575B }
 
 .tool-info { flex: 1; }

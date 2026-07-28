@@ -81,6 +81,14 @@
 			}
 		},
 		{
+			"path": "pages/calculator/rankine-earth-pressure",
+			"style": {
+				"navigationBarTitleText": "朗肯土压力计算",
+				"navigationBarBackgroundColor": "#123F43",
+				"navigationBarTextStyle": "white"
+			}
+		},
+		{
 			"path": "pages/calculator/bearing",
 			"style": {
 				"navigationBarTitleText": "正截面承载力计算",
