@@ -32,8 +32,18 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install Python dependencies
+        run: python -m pip install -r backend/requirements.txt
 
       - name: Test browser calculators
         run: pnpm run test:browser-calculators
@@ -49,6 +59,10 @@ jobs:
 
       - name: Differential calculation verification
         run: python .agents/skills/calculation-verifier/scripts/verify_project.py --cases-per-tool 500 --report verification/reports/ci-verification.md
+
+      - name: Test Python backend
+        working-directory: backend
+        run: python tests/test_calculators.py
 
       - name: Build H5 website
         run: pnpm run build:h5
